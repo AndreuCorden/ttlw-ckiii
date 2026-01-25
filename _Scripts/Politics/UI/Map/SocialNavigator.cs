@@ -1,17 +1,18 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SocialNavigator : MonoBehaviour
 {
     public void FocusOnCharacter(CharacterData target)
     {
-        if (target == null || target.governedTerritory == null)
+        if (target == null || target.heldTitles == null)
         {
             Debug.LogWarning("Focus failed: Target or Territory is null.");
             return;
         }
 
         // Attempt to find a real tile position
-        Vector3 targetPos = GetPhysicalLocation(target.governedTerritory);
+        Vector3 targetPos = GetAveragePosition(target.heldTitles[0].directDomain);
 
         // Ensure we keep the Camera's Z axis so we don't zoom into the map
         Vector3 newCamPos = new Vector3(targetPos.x, targetPos.y, -10f);
@@ -22,24 +23,25 @@ public class SocialNavigator : MonoBehaviour
 
         // Trigger map mode
         MapManager mm = Object.FindAnyObjectByType<MapManager>();
-        if (mm != null) mm.SetMapMode((int)target.governedTerritory.type);
+        if (mm != null) mm.SetMapMode((int)target.heldTitles[0].rank);
     }
-    
-    private Vector3 GetPhysicalLocation(Territory t)
+
+    public Vector3 GetAveragePosition(List<Territory> domain)
     {
-        // 1. If this is a physical tile, return its position
-        if (t.type == TerritoryType.Town) return t.transform.position;
+        if (domain == null || domain.Count == 0)
+            return Vector3.zero;
 
-        // 2. Search all nested children for the first Territory with a SpriteRenderer
-        Territory physicalChild = t.GetComponentInChildren<Territory>(false);
+        Vector3 sumPosition = Vector3.zero;
 
-        // We loop through children to find a 'Town' specifically
-        Territory[] allChildren = t.GetComponentsInChildren<Territory>();
-        foreach (Territory child in allChildren)
+        // 1. Accumulate all positions
+        foreach (Territory t in domain)
         {
-            if (child.type == TerritoryType.Town) return child.transform.position;
+            sumPosition += t.transform.position;
         }
 
-        return t.transform.position;
+        // 2. Divide by the count to get the average
+        Vector3 averagePosition = sumPosition / domain.Count;
+
+        return averagePosition;
     }
 }

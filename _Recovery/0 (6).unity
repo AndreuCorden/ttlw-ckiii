@@ -11263,7 +11263,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapInteraction
   characterDisplay: {fileID: 323568806}
-  mapManager: {fileID: 1785532537}
   townUI: {fileID: 1772422460}
 --- !u!4 &1673372251
 Transform:
@@ -11901,7 +11900,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapManager
   allTerritories: []
-  currentMapMode: 0
+  currentMapMode: 3
 --- !u!1 &1796895851
 GameObject:
   m_ObjectHideFlags: 0

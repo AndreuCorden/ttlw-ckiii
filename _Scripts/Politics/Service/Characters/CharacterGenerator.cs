@@ -366,13 +366,11 @@ public class CharacterGenerator : MonoBehaviour
         // Generate 1-2 Generals
         for (int i = 0; i < 2; i++)
         {
-            CharacterData gen = CreateOfficial(king, CharacterRole.General);
-            king.knights.Add(gen); // The General reports directly to the King
+            CharacterData gen = CreateOfficial(king, CharacterRole.Knight);
         }
 
         // Generate a Priest/Advisor
         CharacterData bishop = CreateOfficial(king, CharacterRole.Priest);
-        king.priest = bishop; // The Priest reports directly to the King
     }
 
     public void CreateRelative(CharacterData character, string relationType)
@@ -416,7 +414,7 @@ public class CharacterGenerator : MonoBehaviour
         CharacterData official = ScriptableObject.CreateInstance<CharacterData>();
         official.characterName = namePool[Random.Range(0, namePool.Length)] + ": " + role.ToString() + " of " + ruler.characterName.Split(" of ")[1];
         official.role = role;
-        official.liege = ruler;
+        ruler.retinue.Add(official); // The official reports directly to the ruler
         return official;
     }
 

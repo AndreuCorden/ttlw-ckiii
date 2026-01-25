@@ -26,23 +26,19 @@ public class CharacterData : ScriptableObject
     public Trait religion;
     public Trait philosophy;
 
-    [Header("Social Connections")]
-    public CharacterData liege;
-    public List<CharacterData> vassals = new List<CharacterData>();
-    public List<CharacterData> knights = new List<CharacterData>();
-    public Family family; // You'll need to create the Family class below
-    public CharacterData priest;
-    
+    [Header("Titles Held")]
+    public List<Title> heldTitles = new List<Title>();
+
     [Header("Family Links")]
+    public Family family; // You'll need to create the Family class below
     public CharacterData father;
     public CharacterData mother;
     public CharacterData spouse;
     public List<CharacterData> children = new List<CharacterData>();
     public List<CharacterData> siblings = new List<CharacterData>();
+    public List<CharacterData> retinue = new List<CharacterData>();
 
     public CharacterRole role; // Add an Enum for: Ruler, General, Priest, etc.
-    
-    public Territory governedTerritory;
 
     // A helper function to get the "Total" of a stat including traits
     public int GetTotalProwess()
@@ -67,4 +63,4 @@ public class CharacterData : ScriptableObject
     public System.Collections.Generic.List<ArmyUnitData> army = new List<ArmyUnitData>();
 }
 
-public enum CharacterRole { Ruler, General, Priest, Merchant, Diplomat, Courtier, Family }
+public enum CharacterRole { Ruler, Knight, Priest, Merchant, Diplomat, Courtier, Family }

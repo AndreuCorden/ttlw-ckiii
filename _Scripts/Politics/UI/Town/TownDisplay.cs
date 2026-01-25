@@ -13,7 +13,7 @@ public class TownDisplay : MonoBehaviour
 
     public void OpenTownDisplay(Territory town)
     {
-        if (town == null || town.type != TerritoryType.Town) return;
+        if (town == null || town.territoryType != TerritoryType.Land) return;
 
         townNameText.text = town.territoryName;
         sizeText.text = $"Settlement Type: {town.size}";
@@ -62,4 +62,47 @@ public class TownDisplay : MonoBehaviour
     {
         displayPanel.SetActive(false);
     }
+
+    // public void RefreshBuildMenu(Territory selectedTerritory)
+    // {
+    //     // 1. Find the current Town Hall level of this territory
+    //     int currentTHLevel = selectedTerritory.GetBuildingLevel("Town Hall");
+
+    //     // 2. Clear your current UI list
+    //     foreach (Transform child in buildMenuContainer) Destroy(child.gameObject);
+
+    //     // 3. Loop through your master list of all possible buildings
+    //     foreach (BuildingData building in settlementEngine.allPossibleBuildings)
+    //     {
+    //         // Instantiate a button for this building
+    //         GameObject btnObj = Instantiate(buildingButtonPrefab, buildMenuContainer);
+    //         BuildButton script = btnObj.GetComponent<BuildButton>();
+
+    //         bool isUnlocked = currentTHLevel >= building.townHallLevelRequired;
+
+    //         // Setup the button visuals
+    //         script.Setup(building, isUnlocked);
+
+    //         // If locked, maybe make the button non-interactable or grayed out
+    //         btnObj.GetComponent<Button>().interactable = isUnlocked;
+    //     }
+    // }
+
+    // public void TryBuild(BuildingData building, Territory t)
+    // {
+    //     int currentTH = t.GetBuildingLevel("Town Hall");
+
+    //     if (currentTH < building.townHallLevelRequired)
+    //     {
+    //         Debug.Log("Town Hall level too low!");
+    //         return;
+    //     }
+
+    //     if (t.owner.gold >= building.goldCost)
+    //     {
+    //         t.owner.gold -= building.goldCost;
+    //         t.AddBuilding(building);
+    //         RefreshBuildMenu(t); // Update the UI
+    //     }
+    // }
 }

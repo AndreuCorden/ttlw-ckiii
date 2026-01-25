@@ -40,26 +40,4 @@ public class PoliticsController : MonoBehaviour
         // Clean up
         GlobalGameManager.Instance.defender = null;
     }
-
-    public void DeclareIndependence(Territory myTerritory)
-    {
-        // 1. Create a new Kingdom object for yourself
-        Kingdom newKingdom = new Kingdom();
-        newKingdom.SetUpKingdom(myTerritory);
-
-        // 2. Recursively change ownership
-        ApplyNewKingdom(myTerritory, newKingdom);
-
-        // 3. Optional: Trigger a 'Diplomatic Penalty' with the old King
-        Debug.Log($"{myTerritory.territoryName} has broken away!");
-    }
-
-    private void ApplyNewKingdom(Territory t, Kingdom k)
-    {
-        t.ownerKingdom = k;
-        foreach (Territory sub in t.subTerritories)
-        {
-            ApplyNewKingdom(sub, k);
-        }
-    }
 }

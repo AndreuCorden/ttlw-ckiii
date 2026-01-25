@@ -4,9 +4,7 @@ using System.Collections.Generic;
 public class MapManager : MonoBehaviour
 {
     public List<Territory> allTerritories = new List<Territory>();
-    public TerritoryType currentMapMode = TerritoryType.Town;
-
-    public CharacterData character;
+    public TitleRank currentMapMode = TitleRank.King;
 
     void Start()
     {
@@ -14,60 +12,48 @@ public class MapManager : MonoBehaviour
 
     public void SetMapMode(int typeIndex)
     {
-        currentMapMode = (TerritoryType)typeIndex;
+        currentMapMode = (TitleRank)typeIndex;
         Debug.Log("Switching Map Mode to: " + currentMapMode);
         UpdateMapVisuals();
     }
-
-    public void ShowMapLayer(int typeIndex)
-    {
-        TerritoryType selectedType = (TerritoryType)typeIndex;
-
-        foreach (Territory t in allTerritories)
-        {
-            // Simple logic: if it's the right layer, show it. If not, dim it.
-            if (t.type == selectedType)
-            {
-                t.GetComponent<SpriteRenderer>().color = Color.white; // High visibility
-            }
-            else
-            {
-                t.GetComponent<SpriteRenderer>().color = new Color(0.3f, 0.3f, 0.3f, 0.5f); // Dimmed
-            }
-        }
-    }
-
     public void UpdateMapVisuals()
     {
-        Territory[] allTiles = Object.FindObjectsByType<Territory>(FindObjectsSortMode.None);
+        Territory[] allTerritories = Object.FindObjectsByType<Territory>(FindObjectsSortMode.None);
 
-        foreach (Territory t in allTiles)
+        foreach (Territory territory in allTerritories)
         {
-            SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
+            SpriteRenderer sr = territory.GetComponent<SpriteRenderer>();
             if (sr == null) continue;
-            if (t.type == TerritoryType.Water)
+
+            // Default to gray/white if something is truly wrong
+            Color targetColor = Color.white;
+
+            switch (currentMapMode)
             {
-                sr.color = Color.blue;
+                case TitleRank.Baron:
+                    // Show the direct owner's color (the Lord who actually holds this tile)
+                    if (territory.owner != null) targetColor = territory.owner.colour;
+                    break;
+
+                case TitleRank.Count:
+                    // If it's part of a county, use that. 
+                    // If the Count/Duke seized it directly, fall back to the owner's color.
+                    if (territory.county != null) targetColor = territory.county.colour;
+                    else if (territory.owner != null) targetColor = territory.owner.colour;
+                    else Debug.Log($"{territory} and {territory.owner}");
+                    break;
+
+                case TitleRank.Duke:
+                    if (territory.duchy != null) targetColor = territory.duchy.colour;
+                    else if (territory.owner != null) targetColor = territory.owner.colour;
+                    break;
+
+                case TitleRank.King:
+                    if (territory.kingdom != null) targetColor = territory.kingdom.colour;
+                    break;
             }
-            else
-            {
-                // Climb the tree to find the leader for the specific mode
-                sr.color = GetColorForMode(t, currentMapMode);
-            }
+
+            sr.color = targetColor;
         }
-    }
-
-    private Color GetColorForMode(Territory t, TerritoryType mode)
-    {
-        // If we found the right level, return that color
-        if (t.type == mode)
-            return t.territoryColour;
-
-        // Otherwise, keep looking up the family tree
-        else if (t.parentTerritory != null)
-            return GetColorForMode(t.parentTerritory, mode);
-
-        // Fallback.
-        return Color.gray;
     }
 }

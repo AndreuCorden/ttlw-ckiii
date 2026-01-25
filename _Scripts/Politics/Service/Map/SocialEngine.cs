@@ -1,31 +1,30 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class SocialEngine : MonoBehaviour
 {
     public CharacterGenerator charGen; // Reference to your factory
+    public Title playerTerritory;
 
-    private Territory playerTerritory;
-
-    public void PopulateWorld(List<Territory> kingdoms, Territory playerCapital)
+    public void PopulateWorld(List<Title> kingdoms, Title playerTitle)
     {
-        playerTerritory = playerCapital;
-        foreach (Territory kingdom in kingdoms)
+        playerTerritory = playerTitle;
+        foreach (Title kingdom in kingdoms)
         {
-            CharacterData king = playerCapital.leader;
-            if (playerTerritory != null && playerTerritory != kingdom)
+            CharacterData king = playerTitle.holder;
+            if (playerTitle != null && playerTitle != kingdom)
             {
                 // 1. Create the King
                 king = charGen.GenerateRandomLeader(" of " + charGen.namePool[Random.Range(0, charGen.namePool.Length)]);
-                kingdom.leader = king;
+                kingdom.holder = king;
                 king.role = CharacterRole.Ruler;
-                king.governedTerritory = kingdom;
-                kingdom.ownerKingdom = new Kingdom();
+                king.heldTitles.Add(kingdom);
             }
 
 
             // 3. Move down to Provinces
-            foreach (Territory province in kingdom.subTerritories)
+            foreach (Title province in kingdom.vassals)
             {
                 ProcessTerritory(province, king, 0.3f); // 30% chance to be a relative
             }
@@ -33,14 +32,14 @@ public class SocialEngine : MonoBehaviour
         }
     }
 
-    void ProcessTerritory(Territory territory, CharacterData liege, float relativeChance)
+    void ProcessTerritory(Title territory, CharacterData liege, float relativeChance)
     {
         CharacterData ruler;
         bool isRelative = Random.value < relativeChance;
 
         if (playerTerritory != null && playerTerritory == territory)
         {
-            ruler = playerTerritory.leader;
+            ruler = playerTerritory.holder;
         }
         else if (isRelative)
         {
@@ -53,15 +52,12 @@ public class SocialEngine : MonoBehaviour
         }
 
         // Create the Ruler for this level (Duke, Count, or Mayor)
-        territory.leader = ruler;
-        ruler.governedTerritory = territory;
-
-        // Form the Feudal Bond
-        ruler.liege = liege;
-        liege.vassals.Add(ruler);
+        territory.holder = ruler;
+        ruler.heldTitles.Add(territory);
+        ruler.role = CharacterRole.Ruler;
 
         // Keep going down the hierarchy
-        foreach (Territory sub in territory.subTerritories)
+        foreach (Title sub in territory.vassals)
         {
             // Further down, the chance of being a relative of the KING decreases
             ProcessTerritory(sub, ruler, 0.2f);

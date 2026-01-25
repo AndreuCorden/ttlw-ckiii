@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using System.Linq;
+using System.Data;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -13,7 +14,9 @@ public class MapGenerator : MonoBehaviour
     private List<Territory> landTiles = new List<Territory>();
     public SocialEngine socialEngine;
     public SettlementEngine settlementEngine;
+    public GameObject mapInteraction;
 
+    [System.Obsolete]
     void Start()
     {
         GenerateTerrain();
@@ -23,7 +26,7 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                if (grid[x, y].type == TerritoryType.Water)
+                if (grid[x, y].territoryType == TerritoryType.Water)
                 {
                     // Either disable them or destroy them if you don't need them
                     Destroy(grid[x, y].gameObject);
@@ -33,24 +36,26 @@ public class MapGenerator : MonoBehaviour
 
         // 1. MUST fill the land list after smoothing is done
         landTiles.Clear();
-        foreach (var t in grid) if (t.type == TerritoryType.Town) landTiles.Add(t);
+        foreach (var t in grid) if (t.territoryType == TerritoryType.Land) landTiles.Add(t);
+
+        LinkNeighbors();
 
         // 2. Start the hierarchy (Top-Down)
-        GenerateImperialHierarchy();
-
-        Object.FindAnyObjectByType<CharacterCreatorUI>().ShowCreator();
+        GenerateFeudalHierarchy();
 
         Object.FindAnyObjectByType<MapManager>().UpdateMapVisuals();
+
+        Object.FindAnyObjectByType<CharacterCreatorUI>().ShowCreator();
     }
 
-    public void FinalizeWorldGeneration(Territory playerCapital)
+    [System.Obsolete]
+    public void FinalizeWorldGeneration(Title playerTitle)
     {
-        List<Territory> kingdomList = new List<Territory>();
-        // This finds EVERY Territory component in the map and picks only the Kingdoms
-        Territory[] allTerritories = GetComponentsInChildren<Territory>();
-        foreach (Territory t in allTerritories)
+        mapInteraction.SetActive(true);
+        List<Title> kingdomList = new List<Title>();
+        foreach (var t in Object.FindObjectsOfType<Title>())
         {
-            if (t.type == TerritoryType.Kingdom)
+            if (t.rank == TitleRank.King)
             {
                 kingdomList.Add(t);
             }
@@ -58,98 +63,262 @@ public class MapGenerator : MonoBehaviour
 
         Debug.Log($"SocialEngine check: {socialEngine != null}. Kingdom Count: {kingdomList.Count}. Tile Count: {landTiles.Count}. Now populating world...");
 
-        socialEngine.PopulateWorld(kingdomList, playerCapital);
+        socialEngine.PopulateWorld(kingdomList, playerTitle);
 
-        Debug.Log($"SocialEngine check: Done populating world. Now assigning capitals.");
-
-        settlementEngine.AssignCapitals(kingdomList);
+        settlementEngine.MarkAsCapital(kingdomList);
 
         Debug.Log($"SocialEngine check: Done assigning capitals. Now assigning sizes and populations.");
 
-        settlementEngine.AssignTerritorySizeAndPopulation(kingdomList);
+        settlementEngine.AssignTerritorySizeAndPopulation();
 
         settlementEngine.RunInitialEconomySimulation();
 
-        foreach (Territory kingdom in kingdomList)
-        {
-            kingdom.ownerKingdom.SetUpKingdom(kingdom);
-        }
+        settlementEngine.RunInitialPopulationAddition(kingdomList,landTiles);
 
         Debug.Log($"Map generation complete. Updating map visuals.");
 
         Object.FindAnyObjectByType<MapManager>().UpdateMapVisuals();
     }
 
-    void GenerateImperialHierarchy()
+    public Title CreateTitle(string prefix, TitleRank rank, Title liege)
     {
-        // Ensure we have land to divide
-        if (landTiles.Count == 0) return;
+        GameObject obj = new GameObject($"Title_{prefix}");
+        obj.transform.SetParent(liege != null ? liege.transform : this.transform);
+        Title t = obj.AddComponent<Title>();
+        t.rank = rank;
+        t.seatOfPower = null;
+        t.liege = liege;
+        if (liege != null) liege.vassals.Add(t);
+        return t;
+    }
 
-        int numKingdoms = landTiles.Count / 200;
-        List<Territory> kingdomCapitals = GetRandomLandTiles(numKingdoms);
-        var kingdomBundles = MultiFloodFill(kingdomCapitals, landTiles);
+    public void GenerateFeudalHierarchy()
+    {
+        // 1. INITIAL GEOGRAPHIC CARVING
+        var KingdomBundles = MultiFloodFill(GetRandomTilesFromList(landTiles, landTiles.Count / 100), landTiles);
+        List<Title> kingdoms = new List<Title>();
 
-        foreach (var bundle in kingdomBundles)
+        foreach (var kbundle in KingdomBundles)
         {
-            // CREATE KINGDOM
-            GameObject kObj = new GameObject("Kingdom_Container");
-            kObj.transform.SetParent(this.transform);
-            Territory kingdom = kObj.AddComponent<Territory>();
-            kingdom.type = TerritoryType.Kingdom;
-            kingdom.territoryColour = new Color(Random.value, Random.value, Random.value);
+            Title kTitle = CreateTitle("Kingdom", TitleRank.King, null);
+            kingdoms.Add(kTitle);
 
-            // DIVIDE INTO PROVINCES
-            DivideIntoSubTerritories(kingdom, bundle.Value, TerritoryType.Province);
+            var ProvinceBundle = MultiFloodFill(GetRandomTilesFromList(kbundle.Value, Mathf.Max(2, kbundle.Value.Count / 30)), kbundle.Value);
+
+            foreach (var pbundle in ProvinceBundle)
+            {
+                Title pTitle = CreateTitle("Province", TitleRank.Duke, kTitle);
+
+                var CountBundle = MultiFloodFill(GetRandomTilesFromList(pbundle.Value, Mathf.Max(2, pbundle.Value.Count / 10)), pbundle.Value);
+
+                foreach (var cbundle in CountBundle)
+                {
+                    Title cTitle = CreateTitle("County", TitleRank.Count, pTitle);
+
+                    // Fill everything with Barons first
+                    foreach (Territory b in cbundle.Value)
+                    {
+                        Title bTitle = CreateTitle("Barony", TitleRank.Baron, cTitle);
+                        b.county = cTitle;
+                        b.duchy = pTitle;
+                        b.kingdom = kTitle;
+                        b.owner = bTitle;
+                        bTitle.seatOfPower = b;
+                        bTitle.directDomain.Add(b);
+                    }
+
+                    // 2. COUNTY SEIZURE (Takes 2 Baronies)
+                    SeizeTiles(cTitle, 2);
+                }
+
+                // 3. PROVINCE SEIZURE (Takes 2 tiles, prefers Baronies over Counties)
+                SeizeTiles(pTitle, 2);
+            }
+
+            // 4. KINGDOM SEIZURE (Takes 2 tiles, prefers Baronies -> Counties -> Dukes)
+            SeizeTiles(kTitle, 2);
+        }
+        ApplyTopDownColours(kingdoms);
+    }
+
+    /// <summary>
+    /// Logic to seize tiles from lower ranks and handle the destruction of previous titles.
+    /// </summary>
+    private void SeizeTiles(Title taker, int amount)
+    {
+        // 1. Find targets (Preferring tiles that aren't currently Seats of Power)
+        List<Territory> targets = taker.FullRealmTiles
+            .Where(t => t.owner != taker && t.owner != null)
+            .OrderBy(t => t == t.owner.seatOfPower ? 1 : 0) // Prefer non-seats (0 comes before 1)
+            .ThenBy(t => (int)t.owner.rank)                 // Prefer lower ranks
+            .ThenBy(t => Random.value)                      // Randomize within those tiers
+            .Take(amount)
+            .ToList();
+
+        for (int i = 0; i < targets.Count; i++)
+        {
+            Territory t = targets[i];
+            Title victim = t.owner;
+
+            // Seize the tile
+            t.owner = taker;
+            taker.directDomain.Add(t);
+            victim.directDomain.Remove(t);
+            if (i == 0) taker.seatOfPower = t;
+
+            // 2. Handle the Victim's Survival Logic
+            HandleTitleSurvival(victim, taker);
         }
     }
 
-    void DivideIntoSubTerritories(Territory parent, List<Territory> availableTiles, TerritoryType subType)
+    private void HandleTitleSurvival(Title victim, Title taker)
     {
-        if (availableTiles.Count == 0) return;
-
-        int divisions = System.Math.Max(2, (int)(availableTiles.Count * UnityEngine.Random.Range(0.015f, 0.026f)));
-
-        List<Territory> seeds = GetRandomTilesFromList(availableTiles, divisions);
-        var bundles = MultiFloodFill(seeds, availableTiles);
-
-        foreach (var bundle in bundles)
+        // If they still own other land, they just move their seat if needed
+        if (victim.directDomain.Count > 0)
         {
-            GameObject subObj = new GameObject(subType.ToString() + "_Container");
-            subObj.transform.SetParent(parent.transform);
+            if (victim.seatOfPower == null || victim.seatOfPower.owner != victim)
+            {
+                victim.seatOfPower = victim.directDomain[0];
+            }
+            return;
+        }
 
-            Territory sub = subObj.AddComponent<Territory>();
-            sub.type = subType;
-            sub.parentTerritory = parent;
-            sub.territoryName = subType.ToString() + " of " + parent.territoryName;
+        // --- NO LAND LEFT: TRY TO SEIZE FROM A VASSAL ---
+        if (victim.vassals.Count > 0)
+        {
+            // Find a vassal to take a tile from (Preferring Barons)
+            Title targetVassal = victim.vassals
+                .OrderBy(v => (int)v.rank)
+                .FirstOrDefault();
+
+            if (targetVassal != null && targetVassal.directDomain.Count > 0)
+            {
+                // Take the vassal's tile
+                Territory seizedFromVassal = targetVassal.directDomain[0];
+
+                targetVassal.directDomain.Remove(seizedFromVassal);
+                victim.directDomain.Add(seizedFromVassal);
+                seizedFromVassal.owner = victim;
+                victim.seatOfPower = seizedFromVassal;
+
+                // Recursively check if that vassal survives now!
+                HandleTitleSurvival(targetVassal, victim);
+                return;
+            }
+        }
+
+        // --- TOTAL ELIMINATION ---
+        // If we got here, they have no land and no vassals to steal from.
+        Debug.Log($"{victim.name} has been eliminated by {taker.name}");
+
+        // Orphans move to the new Taker
+        foreach (Title orphan in new List<Title>(victim.vassals))
+        {
+            orphan.liege = taker;
+            if (!taker.vassals.Contains(orphan)) taker.vassals.Add(orphan);
+        }
+
+        if (victim.liege != null) victim.liege.vassals.Remove(victim);
+        DestroyImmediate(victim.gameObject);
+    }
+
+    // public void GenerateFeudalHierarchy()
+    // {
+    //     // 1. CARVE KINGDOMS
+    //     var kingdomBundles = MultiFloodFill(GetRandomTilesFromList(landTiles, landTiles.Count / 50), landTiles);
+    //     List<Title> kingdoms = new List<Title>();
+
+    //     foreach (var kbundle in kingdomBundles)
+    //     {
+    //         Title kTitle = CreateTitle("Kingdom", TitleRank.King, null);
+    //         kingdoms.Add(kTitle);
+
+    //         // 2. CARVE PROVINCES
+    //         var provinces = MultiFloodFill(GetRandomTilesFromList(kbundle.Value, Mathf.Max(2, kbundle.Value.Count / 20)), kbundle.Value);
+
+    //         foreach (var pbundle in provinces)
+    //         {
+    //             Title dTitle = CreateTitle("Province", TitleRank.Duke, kTitle);
+
+    //             // 3. CARVE COUNTIES
+    //             var counties = MultiFloodFill(GetRandomTilesFromList(pbundle.Value, Mathf.Max(2, pbundle.Value.Count / 5)), pbundle.Value);
+
+    //             foreach (var cbundle in counties)
+    //             {
+    //                 Title cTitle = CreateTitle("County", TitleRank.Count, dTitle);
+
+    //                 // IMPORTANT: Tag all tiles in the county so they know where they live geographically
+    //                 foreach (Territory t in cbundle.Value)
+    //                 {
+    //                     t.county = cTitle;
+    //                     t.duchy = dTitle;
+    //                     t.kingdom = kTitle;
+    //                 }
+    //             }
+
+    //             // 4. ASSIGN SEATS (Now that geography is locked)
+    //             // Pick a Duke seat from the Province bundle
+    //             Territory dSeat = pbundle.Value[Random.Range(0, pbundle.Value.Count)];
+    //             dTitle.seatOfPower = dSeat;
+    //             dTitle.directDomain.Add(dSeat);
+    //         }
+
+    //         // Pick a King seat from the Kingdom bundle
+    //         Territory kSeat = kbundle.Value[Random.Range(0, kbundle.Value.Count)];
+    //         kTitle.seatOfPower = kSeat;
+    //         kTitle.directDomain.Add(kSeat);
+    //     }
+
+    //     // 5. FINAL PASS: Barons and Royal Enclaves
+    //     // We iterate through all land tiles once everything is carved
+    //     foreach (Territory t in landTiles)
+    //     {
+    //         // Skip tiles already claimed as Seats of Power
+    //         if (t.kingdom.seatOfPower == t || t.duchy.seatOfPower == t || t.county.seatOfPower == t)
+    //             continue;
+
+    //         float roll = Random.value;
+    //         if (roll < 0.05f)
+    //         {
+    //             t.kingdom.directDomain.Add(t);
+    //         }
+    //         else if (roll < 0.15f)
+    //         {
+    //             t.duchy.directDomain.Add(t);
+    //         }
+    //         else
+    //         {
+    //             // If nobody high-up took it, it's a Barony for the local Count
+    //             Title baron = CreateTitle("Barony", TitleRank.Baron, t.county);
+    //             baron.seatOfPower = t;
+    //             baron.directDomain.Add(t);
+    //         }
+    //     }
+
+    //     ApplyTopDownColours(kingdoms);
+    // }
+
+    public void ApplyTopDownColours(List<Title> kingdoms)
+    {
+        foreach (Title king in kingdoms)
+        {
+            king.colour = new Color(Random.value, Random.value, Random.value);
+            SetColourRecursive(king, king.colour);
+        }
+    }
+
+    void SetColourRecursive(Title current, Color baseColor)
+    {
+        foreach (Title vassal in current.vassals)
+        {
             float h, s, v;
-            Color.RGBToHSV(parent.territoryColour, out h, out s, out v);
-            s = Mathf.Clamp(s + Random.Range(-0.25f, 0.25f), 0.3f, 1f);
-            v = Mathf.Clamp(v + Random.Range(-0.25f, 0.25f), 0.4f, 1f);
-            sub.territoryColour = Color.HSVToRGB(h, s, v);
+            Color.RGBToHSV(baseColor, out h, out s, out v);
+            // Slightly shift the color for the vassal
+            float sShift = Random.Range(-0.1f, 0.1f);
+            float vShift = Random.Range(-0.1f, 0.1f);
 
-            if (subType == TerritoryType.Province)
-            {
-                // KEEP GOING DOWN
-                DivideIntoSubTerritories(sub, bundle.Value, TerritoryType.County);
-            }
-            else if (subType == TerritoryType.County)
-            {
-                // REACHED THE BOTTOM: Assign the actual Town tiles
-                foreach (Territory townTile in bundle.Value)
-                {
-                    townTile.parentTerritory = sub;
-                    townTile.transform.SetParent(sub.transform);
-
-                    // Final check to make sure name and color are set on the tile
-                    townTile.territoryName = "Town of " + parent.territoryName;
-                    sub.subTerritories.Add(townTile);
-                    Color.RGBToHSV(sub.territoryColour, out h, out s, out v);
-                    s = Mathf.Clamp(s + Random.Range(-0.25f, 0.25f), 0.3f, 1f);
-                    v = Mathf.Clamp(v + Random.Range(-0.25f, 0.25f), 0.4f, 1f);
-                    townTile.territoryColour = Color.HSVToRGB(h, s, v);
-                }
-            }
-            parent.subTerritories.Add(sub);
+            Color vassalColor = Color.HSVToRGB(h, Mathf.Clamp01(s + sShift), Mathf.Clamp01(v + vShift)); vassal.colour = vassalColor;
+            SetColourRecursive(vassal, vassalColor);
         }
     }
 
@@ -224,18 +393,25 @@ public class MapGenerator : MonoBehaviour
         return neighbors;
     }
 
-    Vector2Int GetGridPos(Territory t) => new Vector2Int(Mathf.RoundToInt(t.transform.position.x / spacing), Mathf.RoundToInt(t.transform.position.y / spacing));
-
-    List<Territory> GetRandomLandTiles(int count)
+    void LinkNeighbors()
     {
-        List<Territory> shuffled = new List<Territory>(landTiles);
-        for (int i = 0; i < shuffled.Count; i++)
+        foreach (Territory t in landTiles)
         {
-            int rnd = Random.Range(i, shuffled.Count);
-            var temp = shuffled[rnd]; shuffled[rnd] = shuffled[i]; shuffled[i] = temp;
+            // If it's a grid, find tiles at x+1, x-1, y+1, y-1
+            // If it's physics-based, use a small OverlapCircle
+            Collider2D[] hits = Physics2D.OverlapCircleAll(t.transform.position, 1.1f);
+            foreach (var hit in hits)
+            {
+                Territory neighbor = hit.GetComponent<Territory>();
+                if (neighbor != null && neighbor != t)
+                {
+                    t.neighbors.Add(neighbor);
+                }
+            }
         }
-        return shuffled.GetRange(0, Mathf.Min(count, shuffled.Count));
     }
+
+    Vector2Int GetGridPos(Territory t) => new Vector2Int(Mathf.RoundToInt(t.transform.position.x / spacing), Mathf.RoundToInt(t.transform.position.y / spacing));
 
     List<Territory> GetRandomTilesFromList(List<Territory> list, int count)
     {
@@ -274,13 +450,13 @@ public class MapGenerator : MonoBehaviour
                 // No falloff here—noise goes right to the edge
                 if (finalNoise > 0.35f)
                 {
-                    t.type = TerritoryType.Town;
+                    t.territoryType = TerritoryType.Land;
                 }
                 else
                 {
-                    t.type = TerritoryType.Water;
+                    t.territoryType = TerritoryType.Water;
                 }
-                sr.sprite = (t.type == TerritoryType.Town) ? townSprite : waterSprite;
+                sr.sprite = (t.territoryType == TerritoryType.Land) ? townSprite : waterSprite;
 
                 grid[x, y] = t;
             }
@@ -307,9 +483,9 @@ public class MapGenerator : MonoBehaviour
                     }
                     else if (waterNeighbors <= 3)
                     {
-                        nextGen[x, y] = TerritoryType.Town;
+                        nextGen[x, y] = TerritoryType.Land;
                     }
-                    else nextGen[x, y] = grid[x, y].type;
+                    else nextGen[x, y] = grid[x, y].territoryType;
                 }
             }
 
@@ -318,7 +494,7 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int y = 0; y < height; y++)
                 {
-                    grid[x, y].type = nextGen[x, y];
+                    grid[x, y].territoryType = nextGen[x, y];
                 }
             }
         }
@@ -333,7 +509,7 @@ public class MapGenerator : MonoBehaviour
             {
                 if (nx < 0 || nx >= width || ny < 0 || ny >= height) { count++; continue; }
                 if (nx == x && ny == y) continue;
-                if (grid[nx, ny].type == TerritoryType.Water) count++;
+                if (grid[nx, ny].territoryType == TerritoryType.Water) count++;
             }
         }
         return count;

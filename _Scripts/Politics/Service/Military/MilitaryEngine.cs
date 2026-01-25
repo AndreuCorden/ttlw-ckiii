@@ -7,12 +7,9 @@ public class MilitaryEngine : MonoBehaviour
     public int GetModifiedDefense(ArmyUnitData unit, Territory currentLoc)
     {
         int baseDef = unit.unitType.defensePower;
-
-        // Check if any building in the province provides a regional armor buff
-        Territory province = currentLoc.parentTerritory;
-        if (province != null && province.currentBuildings.Any(b => b.effects.Any(e => e is ArmourEffect)))
+        if (currentLoc != null && currentLoc.currentBuildings.Any(b => b.effects.Any(e => e is ArmourEffect)))
         {
-            var milEffects = province.currentBuildings.SelectMany(b => b.effects).OfType<IMilitaryEffect>();
+            var milEffects = currentLoc.currentBuildings.SelectMany(b => b.effects).OfType<IMilitaryEffect>();
 
             foreach (var effect in milEffects)
             {

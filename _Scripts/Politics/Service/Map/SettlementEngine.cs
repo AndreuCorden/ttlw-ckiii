@@ -1,163 +1,67 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UIElements;
 
 public class SettlementEngine : MonoBehaviour
 {
-    public BuildingData townHallPrefab;
 
-    public void AssignCapitals(List<Territory> kingdoms)
+    public void MarkAsCapital(List<Title> kingdoms)
     {
-        foreach (Territory kingdom in kingdoms)
+        foreach (Title kingdom in kingdoms)
         {
-            // 1. Pick a random Town within the Kingdom to be the "Imperial Capital"
-            Territory kingdomCapital = GetRandomTownRecursive(kingdom);
-
-            // 2. Mark it and set it as a City
-            MarkAsCapital(kingdomCapital, kingdom);
-            kingdomCapital.ownerKingdom.capitalTerritory = kingdomCapital;
-
-            // 3. For every other Province, pick its own capital
-            foreach (Territory province in kingdom.subTerritories)
-            {
-                Territory provinceCapital;
-                // If the Kingdom capital is inside this province, it's ALREADY the capital
-                if (!IsChildOf(province, kingdomCapital))
-                {
-                    provinceCapital = GetRandomTownRecursive(province);
-                    MarkAsCapital(provinceCapital, province);
-                }
-                else
-                {
-                    provinceCapital = kingdomCapital;
-                }
-                // 4. For every other County, pick its own capital
-                foreach (Territory county in province.subTerritories)
-                {
-                    if (IsChildOf(county, provinceCapital)) continue;
-
-                    Territory countyCapital = GetRandomTownRecursive(county);
-                    MarkAsCapital(countyCapital, county);
-                }
-            }
+            kingdom.seatOfPower.isCapital = true;
+            MarkAsCapital(kingdom.vassals);
         }
     }
 
     // 1. Update the signature to accept the 'level' or 'container'
-    private void MarkAsCapital(Territory t, Territory container)
+    private void CapitalSettlementSize(Territory t)
     {
         t.isCapital = true;
 
-        // We check the type of the CONTAINER (Kingdom/Province/County) 
-        // to decide how big the CAPITAL TILE should be.
-        SetSizeCapitol(t, container);
-
-        if (townHallPrefab != null)
+        // Determine size based on the RANK of the Title living there
+        t.size = t.owner.rank switch
         {
-            t.currentBuildings.Add(townHallPrefab);
-        }
+            TitleRank.King => (SettlementSize)Random.Range((int)SettlementSize.SmallCity, (int)SettlementSize.City + 1),
+            TitleRank.Duke => (SettlementSize)Random.Range((int)SettlementSize.Borough, (int)SettlementSize.BigTown + 1),
+            TitleRank.Count => (SettlementSize)Random.Range((int)SettlementSize.SmallTown, (int)SettlementSize.MarketTown + 1),
+            _ => SettlementSize.Village
+        };
+
         t.RefreshUI();
     }
 
-    private Territory GetRandomTownRecursive(Territory container)
+    public void AssignTerritorySizeAndPopulation()
     {
-        // 1. If we are already at the Town level, return this
-        if (container.type == TerritoryType.Town) return container;
-
-        // 2. If this container has no children, we can't find a town
-        if (container.subTerritories == null || container.subTerritories.Count == 0)
+        Territory[] allTerritories = Object.FindObjectsByType<Territory>(FindObjectsSortMode.None);
+        foreach (Territory t in allTerritories)
         {
-            Debug.LogWarning($"Container {container.name} has no sub-territories to pick a capital from!");
-            return null;
-        }
-
-        // 3. Pick a random child branch
-        int randomIndex = Random.Range(0, container.subTerritories.Count);
-        Territory randomChild = container.subTerritories[randomIndex];
-
-        // 4. Recurse down until we hit a Town
-        return GetRandomTownRecursive(randomChild);
-    }
-
-    private bool IsChildOf(Territory parent, Territory child)
-    {
-        if (child == null || parent == null) return false;
-
-        Territory current = child;
-
-        // Climb the tree from the child upwards
-        while (current != null)
-        {
-            if (current == parent) return true;
-            current = current.parentTerritory;
-        }
-
-        return false;
-    }
-
-    public void AssignTerritorySizeAndPopulation(List<Territory> kingdoms)
-    {
-        foreach (Territory Kingdom in kingdoms)
-        {
-            foreach (Territory Province in Kingdom.subTerritories)
+            if (!t.isCapital)
             {
-                foreach (Territory County in Province.subTerritories)
-                {
-                    foreach (Territory Town in County.subTerritories)
-                    {
-                        if (!Town.isCapital)
-                        {
-                            SetSize(Town);
-                        }
-                        SetPopulation(Town);
-                        SetBuildings(Town);
-                    }
-                    County.CalculatePopulation();
-                }
-                Province.CalculatePopulation();
+                t.size = GetRandomWeightedSize();
             }
-            Kingdom.CalculatePopulation();
+            else
+            {
+                CapitalSettlementSize(t);
+            }
+            SetPopulation(t);
+            SetBuildings(t);
         }
     }
 
-    public void SetSize(Territory t)
+    public SettlementSize GetRandomWeightedSize()
     {
-        switch (t.type)
-        {
-            case TerritoryType.County:
-                t.size = (SettlementSize)Random.Range((int)SettlementSize.SmallTown, (int)SettlementSize.MarketTown + 1);
-                break;
-            case TerritoryType.Province:
-                t.size = (SettlementSize)Random.Range((int)SettlementSize.Borough, (int)SettlementSize.BigTown + 1);
-                break;
-            case TerritoryType.Kingdom:
-                // This ensures Kingdom capitals are SmallCity or City
-                t.size = (SettlementSize)Random.Range((int)SettlementSize.SmallCity, (int)SettlementSize.City + 1);
-                break;
-            default:
-                t.size = (SettlementSize)Random.Range((int)SettlementSize.Hamlet, (int)SettlementSize.City + 1);
-                break;
-        }
-    }
+        // Roll two random numbers and average them
+        float roll1 = Random.Range(0f, 1f);
+        float roll2 = Random.Range(0f, 1f);
+        float averaged = (roll1 + roll2) / 2f;
 
-    public void SetSizeCapitol(Territory t, Territory container)
-    {
-        switch (container.type)
-        {
-            case TerritoryType.County:
-                t.size = (SettlementSize)Random.Range((int)SettlementSize.SmallTown, (int)SettlementSize.MarketTown + 1);
-                break;
-            case TerritoryType.Province:
-                t.size = (SettlementSize)Random.Range((int)SettlementSize.Borough, (int)SettlementSize.BigTown + 1);
-                break;
-            case TerritoryType.Kingdom:
-                // This ensures Kingdom capitals are SmallCity or City
-                t.size = (SettlementSize)Random.Range((int)SettlementSize.SmallCity, (int)SettlementSize.City + 1);
-                break;
-            default:
-                t.size = (SettlementSize)Random.Range((int)SettlementSize.Hamlet, (int)SettlementSize.City + 1);
-                break;
-        }
+        // Scale that 0-1 value to your Enum count
+        int enumCount = System.Enum.GetValues(typeof(SettlementSize)).Length;
+        int index = Mathf.FloorToInt(averaged * enumCount);
+
+        return (SettlementSize)index;
     }
 
     public void SetPopulation(Territory t)
@@ -241,51 +145,85 @@ public class SettlementEngine : MonoBehaviour
 
     public void RunInitialEconomySimulation()
     {
-        Territory[] allTerritories = Object.FindObjectsByType<Territory>(FindObjectsSortMode.None);
-        List<Territory> towns = allTerritories.Where(t => t.type == TerritoryType.Town).ToList();
+        Territory[] territories = Object.FindObjectsByType<Territory>(FindObjectsSortMode.None);
 
-        foreach (Territory t in towns)
+        foreach (Territory t in territories)
         {
-            // A. Run growth first (since you want to show "Next Turn's" potential)
-            t.population += Mathf.RoundToInt(t.population * 0.05f);
-
             // B. Calculate Gold based on THIS new population
             float goldGenerated = t.GetGoldPerTurn();
             goldGenerated += t.population / 100f;
 
             // C. Store it
-            t.localWealth = goldGenerated;
+            t.localWealth = (int)goldGenerated;
 
             // Note: We don't add to treasury here yet because the game hasn't "started"
         }
 
         // D. Update the hierarchy so Counties/Kingdoms show the sum of these new numbers
-        RefreshHierarchyStats(allTerritories);
+        RefreshHierarchyStats();
     }
 
-    private void RefreshHierarchyStats(Territory[] all)
+    private void RefreshHierarchyStats()
     {
-        // Sort by type so we update bottom-up: County -> Province -> Kingdom
-        // This ensures that when a Kingdom calculates pop, its Provinces are already accurate
-        List<Territory> counties = all.Where(t => t.type == TerritoryType.County).ToList();
-        List<Territory> provinces = all.Where(t => t.type == TerritoryType.Province).ToList();
-        List<Territory> kingdoms = all.Where(t => t.type == TerritoryType.Kingdom).ToList();
+        Title[] counties = Object.FindObjectsByType<Title>(FindObjectsSortMode.None)
+            .Where(t => t.rank == TitleRank.Count).ToArray();
+        Title[] provinces = Object.FindObjectsByType<Title>(FindObjectsSortMode.None)
+            .Where(t => t.rank == TitleRank.Duke).ToArray();
+        Title[] kingdoms = Object.FindObjectsByType<Title>(FindObjectsSortMode.None)
+            .Where(t => t.rank == TitleRank.King).ToArray();
 
         foreach (var t in counties)
         {
             // Update localWealth for the UI/Summary
-            t.localWealth = t.subTerritories.Sum(sub => sub.localWealth);
+            t.personalTreasury = t.directDomain.Sum(sub => sub.localWealth);
         }
         foreach (var t in provinces)
         {
             // Update localWealth for the UI/Summary
-            t.localWealth = t.subTerritories.Sum(sub => sub.localWealth);
+            t.personalTreasury = t.vassals.Sum(sub => sub.personalTreasury);
         }
         foreach (var t in kingdoms)
         {
             // Update localWealth for the UI/Summary
-            t.localWealth = t.subTerritories.Sum(sub => sub.localWealth);
+            t.personalTreasury = t.vassals.Sum(sub => sub.personalTreasury);
         }
+    }
+
+    public void RunInitialPopulationAddition(List<Title> kingdoms, List<Territory> allLand)
+    {
+        foreach (Title king in kingdoms)
+        {
+            int pop = 0;
+            foreach (Territory land in king.directDomain)
+            {
+                pop += land.population;
+            }
+            king.personalPopulation = pop;
+            foreach (Title lord in king.vassals)
+            {
+                RefreshPopulationStats(lord);
+            }
+        }
+        foreach (Territory land in allLand)
+        {
+            land.county.totalPopulation += land.population;
+            land.duchy.totalPopulation += land.population;
+            land.kingdom.totalPopulation += land.population;
+        }
+    }
+
+    private void RefreshPopulationStats(Title lord)
+    {
+        int pop = 0;
+        foreach (Territory land in lord.directDomain)
+        {
+            pop += land.population;
+        }
+        foreach (Title vassal in lord.vassals)
+        {
+            RefreshPopulationStats(vassal);
+        }
+        lord.personalPopulation = pop;
     }
 
     // public void ExecuteVassalAI(Territory vassalTerritory)
@@ -303,23 +241,4 @@ public class SettlementEngine : MonoBehaviour
     //         target.currentBuildings.Add(choice);
     //     }
     // }
-
-    public void KingOrderBuild(Territory targetTown, BuildingData building, bool forceVassalToPay)
-    {
-        Kingdom king = targetTown.ownerKingdom;
-
-        if (forceVassalToPay)
-        {
-            targetTown.parentTerritory.personalTreasury -= building.cost;
-            // Logic to decrease relationship/increase tyranny here
-        }
-        else
-        {
-            king.treasury -= building.cost;
-            // Logic to increase relationship (Generosity)
-        }
-
-        targetTown.currentBuildings.Add(building);
-        targetTown.RefreshUI();
-    }
 }

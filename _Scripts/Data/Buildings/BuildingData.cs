@@ -10,6 +10,7 @@ public class BuildingData : ScriptableObject, IDescribable
     public int level;
     public BuildingData nextUpgrade; // Link to the next level
     public BuildingData previousLevel; // Link to the previous level
+    public BuildingData townHallLevelRequired;
 
     [Header("Building Effects")]
     public List<BuildingEffect> effects = new List<BuildingEffect>();

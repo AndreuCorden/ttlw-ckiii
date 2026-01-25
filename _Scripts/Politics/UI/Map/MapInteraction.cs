@@ -4,77 +4,74 @@ using UnityEngine.EventSystems;
 public class MapInteraction : MonoBehaviour
 {
     public CharacterDisplay characterDisplay; // Drag your CharacterDisplay here
-    public MapManager mapManager; // Drag your MapManager here
 
     public TownDisplay townUI; // Drag your TownDisplay here
 
     void Update()
     {
-        if (EventSystem.current.IsPointerOverGameObject())
+        if (EventSystem.current.IsPointerOverGameObject()) return;
+
+        if (Input.GetMouseButtonDown(0)) // Left Click - Character
         {
-            return; // Stop the code here so we don't click the map through the UI
+            HandleMapClick(true);
         }
-        if (Input.GetMouseButtonDown(0))
+        else if (Input.GetMouseButtonDown(1)) // Right Click - Town
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
-
-            if (hit.collider != null)
-            {
-                Territory t = hit.collider.GetComponent<Territory>();
-                if (t != null)
-                {
-                    CharacterData leaderToDisplay = null;
-
-                    // Look at MapManager to see what level we are viewing
-                    int currentMode = (int)Object.FindAnyObjectByType<MapManager>().currentMapMode;
-
-                    if (currentMode == 0) // Town Mode
-                        leaderToDisplay = t.leader;
-                    else if (currentMode == 1) // County Mode
-                        leaderToDisplay = t.parentTerritory?.leader;
-                    else if (currentMode == 2) // Province Mode
-                        leaderToDisplay = t.parentTerritory?.parentTerritory?.leader;
-                    else if (currentMode == 5) // Kingdom Mode
-                        leaderToDisplay = t.parentTerritory?.parentTerritory?.parentTerritory?.leader;
-
-                    if (leaderToDisplay != null)
-                        townUI.CloseDisplay();
-                    characterDisplay.OpenCharacterDisplay(leaderToDisplay);
-                }
-            }
-        }
-        // Inside MapInteraction.Update()
-        if (Input.GetMouseButtonDown(1)) // 1 is Right Click
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
-
-            if (hit.collider != null)
-            {
-                Territory t = hit.collider.GetComponent<Territory>();
-                if (t != null)
-                {
-                    // If we clicked a container, we find the first town tile inside it
-                    if (t.type != TerritoryType.Town)
-                    {
-                        t = GetFirstTown(t);
-                    }
-
-                    if (t != null)
-                    {
-                        characterDisplay.CloseDisplay();
-                        townUI.OpenTownDisplay(t);
-                    }
-                }
-            }
+            HandleMapClick(false);
         }
     }
-    // Helper to ensure right-click finds a town even if clicking a large border
-    private Territory GetFirstTown(Territory container)
+
+    private void HandleMapClick(bool isLeftClick)
     {
-        if (container.type == TerritoryType.Town) return container;
-        if (container.subTerritories.Count > 0) return GetFirstTown(container.subTerritories[0]);
-        return null;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
+
+        if (hit.collider != null)
+        {
+            Territory t = hit.collider.GetComponent<Territory>();
+            if (t == null) return;
+
+            if (isLeftClick)
+            {
+                // 1. Get the current map mode
+                TitleRank currentMode = Object.FindAnyObjectByType<MapManager>().currentMapMode;
+
+                // 2. Direct Pull: Get the specific title based on the map mode
+                Title targetTitle = null;
+                switch (currentMode)
+                {
+                    case TitleRank.Baron: targetTitle = t.owner; break;
+                    case TitleRank.Count: targetTitle = t.county; break;
+                    case TitleRank.Duke: targetTitle = t.duchy; break;
+                    case TitleRank.King: targetTitle = t.kingdom; break;
+                }
+
+                // 3. Fallback: If the specific rank doesn't exist (e.g. tile is owned directly by a King)
+                // we climb the tree until we find the highest available lord.
+                if (targetTitle == null)
+                {
+                    targetTitle = t.owner; // Start at the bottom
+                    while (targetTitle != null && targetTitle.rank < currentMode && targetTitle.liege != null)
+                    {
+                        targetTitle = targetTitle.liege;
+                    }
+                }
+
+                if (targetTitle != null && targetTitle.holder != null)
+                {
+                    townUI.CloseDisplay();
+                    characterDisplay.OpenCharacterDisplay(targetTitle.holder);
+                }
+                else
+                {
+                    Debug.LogWarning($"No holder found for {targetTitle?.name ?? "NULL Title"} at {t.name}");
+                }
+            }
+            else // Right Click
+            {
+                characterDisplay.CloseDisplay();
+                townUI.OpenTownDisplay(t);
+            }
+        }
     }
 }

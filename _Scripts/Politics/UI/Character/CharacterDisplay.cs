@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI; // If using Legacy Text
 using TMPro; // Use this if you created TextMeshPro objects
 
 public class CharacterDisplay : MonoBehaviour
@@ -69,6 +68,10 @@ public class CharacterDisplay : MonoBehaviour
         characterToDisplay = character;
         UpdateUI();
         gameObject.SetActive(true);
+        if (selectionUI.isActiveAndEnabled)
+        {
+            OnFamilyClick();
+        }
     }
 
     public void OnGiftClick() { DiplomacyManager.Instance.GiveGift(characterToDisplay); UpdateUI(); }
@@ -86,18 +89,13 @@ public class CharacterDisplay : MonoBehaviour
         }
     }
 
-    public void OnFamilyButtonPressed()
-    {
-        // 'characterToDisplay' should be the CharacterData 
-        // your UI is currently showing
-        if (characterToDisplay != null)
-        {
-            selectionUI.OpenCharacterMenu(characterToDisplay);
-        }
-    }
-
     public void CloseDisplay()
     {
         gameObject.SetActive(false);
+    }
+
+    public void OnFamilyClick()
+    {
+        selectionUI.OpenCharacterMenu(characterToDisplay);
     }
 }

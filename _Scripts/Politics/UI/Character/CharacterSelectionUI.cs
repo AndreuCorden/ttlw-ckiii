@@ -13,7 +13,6 @@ public class CharacterSelectionUI : MonoBehaviour
 
     public void OpenCharacterMenu(CharacterData character)
     {
-        Debug.Log($"Opening Menu for {character.characterName}. List count: {character.vassals.Count}");
         uiPanel.SetActive(true);
         headerText.text = "House of " + character.family.familyName;
 
@@ -38,20 +37,21 @@ public class CharacterSelectionUI : MonoBehaviour
             CreateButton("◊ SIBLING: " + sibling.characterName, () => SelectCharacter(sibling));
 
         // 4. NAVIGATION: GO UP (Hierarchy)
-        if (character.liege != null)
-            CreateButton("↑ LIEGE: " + character.liege.characterName, () => SelectCharacter(character.liege));
+        foreach (Title liege in character.heldTitles)
+            if ( liege.liege != null) CreateButton("↑ LIEGE: " + liege.liege.holder.characterName, () => SelectCharacter(liege.liege.holder));
 
-        // 5. NAVIGATION: GO DOWN (Vassals/Land)
-        foreach (CharacterData vassal in character.vassals)
-            CreateButton("↓ VASSAL: " + vassal.characterName, () => SelectCharacter(vassal));
+        // // 5. NAVIGATION: GO DOWN (Vassals/Land)
+        foreach (Title title in character.heldTitles)
+            foreach (Title vassal in title.vassals)
+                CreateButton("↓ VASSAL: " + vassal.holder.characterName, () => SelectCharacter(vassal.holder));
 
-        // 6. SOCIAL: KNIGHTS
-        foreach (CharacterData knight in character.knights)
-            CreateButton(" KNIGHT: " + knight.characterName, () => SelectCharacter(knight));
+        // // 6. SOCIAL: KNIGHTS
+        foreach (CharacterData retinue in character.retinue)
+            CreateButton($"{retinue.role}: " + retinue.characterName, () => SelectCharacter(retinue));
 
-        // 7. SOCIAL: PRIEST
-        if (character.priest != null)
-            CreateButton(" PRIEST: " + character.priest.characterName, () => SelectCharacter(character.priest));
+        // // 7. SOCIAL: PRIEST
+        // if (character.priest != null)
+        //     CreateButton(" PRIEST: " + character.priest.characterName, () => SelectCharacter(character.priest));
     }
 
     void CreateButton(string label, System.Action onClickAction)

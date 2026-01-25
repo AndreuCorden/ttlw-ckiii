@@ -3,11 +3,10 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour
 {
     public static PlayerManager Instance;
-    
+
     [Header("Player Identity")]
     public CharacterData playerCharacter;
     public Family playerFamily;
-    public Kingdom playerKingdom;
     private string pendingKingdomName;
 
     void Awake() => Instance = this;
@@ -28,56 +27,41 @@ public class PlayerManager : MonoBehaviour
         Debug.Log($"Created {firstName} {lastName}. Now select a territory on the map.");
     }
 
-    public Territory AssignPlayerToTerritory(Territory clickedTile,TerritoryType currentMapMode)
+    public Title AssignPlayerToTerritory(Territory clickedTile, TitleRank currentMapMode)
     {
-        Territory current = clickedTile;
-        while (current.type != currentMapMode && current.parentTerritory != null)
+        Title titleToAssign = null;
+
+        switch (currentMapMode)
         {
-            current = current.parentTerritory;
+            case TitleRank.Baron:
+                // Find the specific title sitting on this tile. 
+                // We look at the vassals of the County because Barons are Count's vassals.
+                titleToAssign = clickedTile.county.vassals.Find(v => v.rank == TitleRank.Baron && v.directDomain.Contains(clickedTile));
+
+                // If it's not a Barony (e.g. it's the King's personal tile), 
+                // then the player can't "be" the Baron there because no Barony exists.
+                break;
+
+            case TitleRank.Count:
+                titleToAssign = clickedTile.county;
+                break;
+
+            case TitleRank.Duke:
+                titleToAssign = clickedTile.duchy;
+                break;
+
+            case TitleRank.King:
+                titleToAssign = clickedTile.kingdom;
+                break;
         }
-        // Transfer power to the player
-        current.leader = playerCharacter;
-        playerCharacter.governedTerritory = current;
 
-        // Setup the Kingdom
-        playerKingdom = new Kingdom();
-        playerKingdom.SetUpKingdom(current);
-        playerKingdom.kingdomName = pendingKingdomName; // Or custom name
-        playerCharacter.family.familyColor = current.territoryColour;
-        
-        current.ownerKingdom = playerKingdom;
-        Debug.Log($"Player is now the ruler of {current.territoryName}");
-        
-        return current;
-    }
-
-    public void RequestInvasionPermission(CharacterData targetVassal)
-{
-    CharacterData liege = playerCharacter.liege;
-
-    // Logic: King denies if Authority is high and Stability is needed
-    // King ignores/accepts if he is weak (Low Authority)
-    if (liege.influence < 30) 
-    {
-        Debug.Log("The King is too weak to stop you. You proceed anyway.");
-        StartWar(targetVassal);
-    }
-    else 
-    {
-        // Roll for permission based on relationship
-        bool permissionGranted = Random.value > 0.5f;
-        if (!permissionGranted) 
+        if (titleToAssign != null)
         {
-            // If you invade anyway, you lose reputation with the family
-            playerFamily.reputation -= 20;
-            Debug.Log("The King denied you! Invading now will be seen as an act of defiance.");
+            titleToAssign.holder = playerCharacter;
+            titleToAssign.titleName = pendingKingdomName;
+            playerCharacter.heldTitles.Add(titleToAssign);
         }
-    }
-}
 
-    private void StartWar(CharacterData targetVassal)
-    {
-        Debug.Log($"Starting war against {targetVassal.characterName}!");
-        // Implement war logic here
+        return titleToAssign;
     }
 }

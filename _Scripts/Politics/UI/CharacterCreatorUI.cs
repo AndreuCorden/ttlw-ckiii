@@ -37,6 +37,7 @@ public class CharacterCreatorUI : MonoBehaviour
         isSelectingTerritory = true;
     }
 
+    [System.Obsolete]
     void Update()
     {
         if (isSelectingTerritory && Input.GetMouseButtonDown(0))
@@ -45,6 +46,7 @@ public class CharacterCreatorUI : MonoBehaviour
         }
     }
 
+    [System.Obsolete]
     private void DetectTerritoryClick()
     {
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -54,14 +56,14 @@ public class CharacterCreatorUI : MonoBehaviour
         {
             Territory clickedTerritory = hit.collider.GetComponent<Territory>();
 
-            if (clickedTerritory != null && clickedTerritory.type != TerritoryType.Water)
+            if (clickedTerritory != null && clickedTerritory.territoryType == TerritoryType.Land)
             {
-                TerritoryType currentMapMode = Object.FindAnyObjectByType<MapManager>().currentMapMode;
+                TitleRank currentMapMode = Object.FindAnyObjectByType<MapManager>().currentMapMode;
                 // 1. Assign Player
-                Territory playerSelectedTerritory = PlayerManager.Instance.AssignPlayerToTerritory(clickedTerritory,currentMapMode);
+                Title playerSelectedTitle = PlayerManager.Instance.AssignPlayerToTerritory(clickedTerritory,currentMapMode);
 
                 // 2. Resume the rest of the world generation
-                Object.FindAnyObjectByType<MapGenerator>().FinalizeWorldGeneration(playerSelectedTerritory);
+                Object.FindAnyObjectByType<MapGenerator>().FinalizeWorldGeneration(playerSelectedTitle);
 
                 // 3. Close UI
                 selectionText.SetActive(false);
