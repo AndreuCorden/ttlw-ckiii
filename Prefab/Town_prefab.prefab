@@ -205,6 +205,15 @@ MonoBehaviour:
   size: 0
   isCapital: 0
   capitalIcon: {fileID: 1799283990869881619}
+  currentBuildings: []
+  localWealth: 0
+  population: 0
+  instability: 0
+  ownerKingdom:
+    kingdomName: 
+    treasury: 0
+    capitalTerritory: {fileID: 0}
+  territoryColour: {r: 0, g: 0, b: 0, a: 0}
 --- !u!61 &2786609505759007431
 BoxCollider2D:
   m_ObjectHideFlags: 0

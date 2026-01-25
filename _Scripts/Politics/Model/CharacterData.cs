@@ -26,16 +26,13 @@ public class CharacterData : ScriptableObject
     public Trait religion;
     public Trait philosophy;
 
-    [Header("Faction Details")]
-    public Color factionColor = Color.white;
-
     [Header("Social Connections")]
     public CharacterData liege;
     public List<CharacterData> vassals = new List<CharacterData>();
     public List<CharacterData> knights = new List<CharacterData>();
-    public CharacterData priest;
     public Family family; // You'll need to create the Family class below
-
+    public CharacterData priest;
+    
     [Header("Family Links")]
     public CharacterData father;
     public CharacterData mother;

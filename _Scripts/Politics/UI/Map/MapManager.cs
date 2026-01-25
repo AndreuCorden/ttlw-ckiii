@@ -59,15 +59,15 @@ public class MapManager : MonoBehaviour
 
     private Color GetColorForMode(Territory t, TerritoryType mode)
     {
-        // If we found the right level and it has a leader, return that color
-        if (t.type == mode && t.leader != null)
-            return t.leader.factionColor;
+        // If we found the right level, return that color
+        if (t.type == mode)
+            return t.territoryColour;
 
         // Otherwise, keep looking up the family tree
-        if (t.parentTerritory != null)
+        else if (t.parentTerritory != null)
             return GetColorForMode(t.parentTerritory, mode);
 
-        // Fallback: if we are at the top (Kingdom) and still no leader, try current leader
-        return t.leader != null ? t.leader.factionColor : Color.gray;
+        // Fallback.
+        return Color.gray;
     }
 }

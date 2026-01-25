@@ -9,5 +9,4 @@ public class UnitType : ScriptableObject
     public int defensePower = 5;
     public float attackRange = 2f;
     public GameObject unitPrefab; // The 3D model/sprite for this unit
-    public float maxHealth = 100f;
 }

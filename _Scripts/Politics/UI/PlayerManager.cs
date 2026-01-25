@@ -28,20 +28,27 @@ public class PlayerManager : MonoBehaviour
         Debug.Log($"Created {firstName} {lastName}. Now select a territory on the map.");
     }
 
-    public void AssignPlayerToTerritory(Territory target)
+    public Territory AssignPlayerToTerritory(Territory clickedTile,TerritoryType currentMapMode)
     {
+        Territory current = clickedTile;
+        while (current.type != currentMapMode && current.parentTerritory != null)
+        {
+            current = current.parentTerritory;
+        }
         // Transfer power to the player
-        target.leader = playerCharacter;
-        playerCharacter.governedTerritory = target;
+        current.leader = playerCharacter;
+        playerCharacter.governedTerritory = current;
 
         // Setup the Kingdom
         playerKingdom = new Kingdom();
-        playerKingdom.SetUpKingdom(target);
+        playerKingdom.SetUpKingdom(current);
         playerKingdom.kingdomName = pendingKingdomName; // Or custom name
+        playerCharacter.family.familyColor = current.territoryColour;
         
-        target.ownerKingdom = playerKingdom;
-
-        Debug.Log($"Player is now the ruler of {target.territoryName}");
+        current.ownerKingdom = playerKingdom;
+        Debug.Log($"Player is now the ruler of {current.territoryName}");
+        
+        return current;
     }
 
     public void RequestInvasionPermission(CharacterData targetVassal)

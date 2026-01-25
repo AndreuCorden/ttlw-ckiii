@@ -64,6 +64,13 @@ public class CharacterSelectionUI : MonoBehaviour
     void SelectCharacter(CharacterData target)
     {
         navigator.FocusOnCharacter(target); // Moves camera
+        Object.FindAnyObjectByType<CharacterDisplay>().characterToDisplay = target;
+        Object.FindAnyObjectByType<CharacterDisplay>().UpdateUI(); // Updates display
         OpenCharacterMenu(target);          // Refreshes UI for the new person
+    }
+
+    public void CloseMenu()
+    {
+        uiPanel.SetActive(false);
     }
 }

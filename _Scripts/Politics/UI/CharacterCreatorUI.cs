@@ -56,11 +56,12 @@ public class CharacterCreatorUI : MonoBehaviour
 
             if (clickedTerritory != null && clickedTerritory.type != TerritoryType.Water)
             {
+                TerritoryType currentMapMode = Object.FindAnyObjectByType<MapManager>().currentMapMode;
                 // 1. Assign Player
-                PlayerManager.Instance.AssignPlayerToTerritory(clickedTerritory);
+                Territory playerSelectedTerritory = PlayerManager.Instance.AssignPlayerToTerritory(clickedTerritory,currentMapMode);
 
                 // 2. Resume the rest of the world generation
-                Object.FindAnyObjectByType<MapGenerator>().FinalizeWorldGeneration(clickedTerritory);
+                Object.FindAnyObjectByType<MapGenerator>().FinalizeWorldGeneration(playerSelectedTerritory);
 
                 // 3. Close UI
                 selectionText.SetActive(false);

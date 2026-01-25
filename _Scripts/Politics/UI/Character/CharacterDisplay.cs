@@ -50,18 +50,12 @@ public class CharacterDisplay : MonoBehaviour
         armyText.text = $"Total Soldiers: {totalSoldiers}";
     }
 
-    public void CloseCharacterDisplay()
-    {
-        // Hide the panel
-        gameObject.SetActive(false);
-    }
-
     void Update()
     {
         // Check if the Escape key is pressed while the display is active
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            CloseCharacterDisplay();
+            CloseDisplay();
         }
     }
 

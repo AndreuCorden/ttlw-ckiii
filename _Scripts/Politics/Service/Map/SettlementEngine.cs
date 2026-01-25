@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class SettlementEngine : MonoBehaviour
 {
@@ -19,16 +20,21 @@ public class SettlementEngine : MonoBehaviour
             // 3. For every other Province, pick its own capital
             foreach (Territory province in kingdom.subTerritories)
             {
+                Territory provinceCapital;
                 // If the Kingdom capital is inside this province, it's ALREADY the capital
-                if (IsChildOf(province, kingdomCapital)) continue;
-
-                Territory provinceCapital = GetRandomTownRecursive(province);
-                MarkAsCapital(provinceCapital, province);
-
+                if (!IsChildOf(province, kingdomCapital))
+                {
+                    provinceCapital = GetRandomTownRecursive(province);
+                    MarkAsCapital(provinceCapital, province);
+                }
+                else
+                {
+                    provinceCapital = kingdomCapital;
+                }
                 // 4. For every other County, pick its own capital
                 foreach (Territory county in province.subTerritories)
                 {
-                    if (IsChildOf(county, kingdomCapital) || IsChildOf(county, provinceCapital)) continue;
+                    if (IsChildOf(county, provinceCapital)) continue;
 
                     Territory countyCapital = GetRandomTownRecursive(county);
                     MarkAsCapital(countyCapital, county);
@@ -104,6 +110,7 @@ public class SettlementEngine : MonoBehaviour
                             SetSize(Town);
                         }
                         SetPopulation(Town);
+                        SetBuildings(Town);
                     }
                     County.CalculatePopulation();
                 }
@@ -160,35 +167,159 @@ public class SettlementEngine : MonoBehaviour
         switch (t.size)
         {
             case SettlementSize.Hamlet:
-                t.population = (int) (capitalBonus * Random.Range(50, 500));
+                t.population = (int)(capitalBonus * Random.Range(50, 500));
                 break;
             case SettlementSize.Village:
-                t.population = (int) (capitalBonus * Random.Range(500, 1000));
+                t.population = (int)(capitalBonus * Random.Range(500, 1000));
                 break;
             case SettlementSize.BigVillage:
-                t.population = (int) (capitalBonus * Random.Range(1000, 3000));
+                t.population = (int)(capitalBonus * Random.Range(1000, 3000));
                 break;
             case SettlementSize.SmallTown:
-                t.population = (int) (capitalBonus * Random.Range(3000, 5000));
+                t.population = (int)(capitalBonus * Random.Range(3000, 5000));
                 break;
             case SettlementSize.MarketTown:
-                t.population = (int) (capitalBonus * Random.Range(5000, 7000));
+                t.population = (int)(capitalBonus * Random.Range(5000, 7000));
                 break;
             case SettlementSize.Borough:
-                t.population = (int) (capitalBonus * Random.Range(7000, 10000));
+                t.population = (int)(capitalBonus * Random.Range(7000, 10000));
                 break;
             case SettlementSize.BigTown:
-                t.population = (int) (capitalBonus * Random.Range(10000, 15000));
+                t.population = (int)(capitalBonus * Random.Range(10000, 15000));
                 break;
             case SettlementSize.SmallCity:
-                t.population = (int) (capitalBonus * Random.Range(15000, 50000));
+                t.population = (int)(capitalBonus * Random.Range(15000, 50000));
                 break;
             case SettlementSize.City:
-                t.population = (int) (capitalBonus * Random.Range(50000, 200000));
+                t.population = (int)(capitalBonus * Random.Range(50000, 200000));
                 break;
             default:
                 t.population = 0;
                 break;
         }
+    }
+
+    public void SetBuildings(Territory t)
+    {
+        // Simple building assignment based on settlement size
+        BuildingLibrary buildingLibrary = Resources.Load<BuildingLibrary>("BuildingLibrary");
+        if (buildingLibrary == null)
+        {
+            Debug.LogError("BuildingLibrary not found in Resources!");
+            return;
+        }
+
+        // Always add the Town Hall of appropriate level
+        BuildingData townHall = buildingLibrary.townHallLevels[Mathf.Clamp((int)t.size, 0, buildingLibrary.townHallLevels.Count - 1)];
+        t.currentBuildings.Add(townHall);
+
+        // Add additional buildings based on size
+        int additionalBuildings = System.Math.Min((int)t.size, buildingLibrary.allPossibleBuildings.Count); // More buildings for larger settlements
+        int numRep = 0;
+        while (t.currentBuildings.Count < (additionalBuildings + 1) && numRep < 20)
+        {
+            int randomIndex = Random.Range(0, buildingLibrary.allPossibleBuildings.Count);
+            BuildingData buildingToAdd = buildingLibrary.allPossibleBuildings[randomIndex];
+            while (buildingToAdd.level < additionalBuildings)
+            {
+                if (buildingToAdd.nextUpgrade != null)
+                {
+                    buildingToAdd = buildingToAdd.nextUpgrade;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (!t.currentBuildings.Contains(buildingToAdd))
+            {
+                t.currentBuildings.Add(buildingToAdd);
+            }
+            numRep++;
+        }
+    }
+
+    public void RunInitialEconomySimulation()
+    {
+        Territory[] allTerritories = Object.FindObjectsByType<Territory>(FindObjectsSortMode.None);
+        List<Territory> towns = allTerritories.Where(t => t.type == TerritoryType.Town).ToList();
+
+        foreach (Territory t in towns)
+        {
+            // A. Run growth first (since you want to show "Next Turn's" potential)
+            t.population += Mathf.RoundToInt(t.population * 0.05f);
+
+            // B. Calculate Gold based on THIS new population
+            float goldGenerated = t.GetGoldPerTurn();
+            goldGenerated += t.population / 100f;
+
+            // C. Store it
+            t.localWealth = goldGenerated;
+
+            // Note: We don't add to treasury here yet because the game hasn't "started"
+        }
+
+        // D. Update the hierarchy so Counties/Kingdoms show the sum of these new numbers
+        RefreshHierarchyStats(allTerritories);
+    }
+
+    private void RefreshHierarchyStats(Territory[] all)
+    {
+        // Sort by type so we update bottom-up: County -> Province -> Kingdom
+        // This ensures that when a Kingdom calculates pop, its Provinces are already accurate
+        List<Territory> counties = all.Where(t => t.type == TerritoryType.County).ToList();
+        List<Territory> provinces = all.Where(t => t.type == TerritoryType.Province).ToList();
+        List<Territory> kingdoms = all.Where(t => t.type == TerritoryType.Kingdom).ToList();
+
+        foreach (var t in counties)
+        {
+            // Update localWealth for the UI/Summary
+            t.localWealth = t.subTerritories.Sum(sub => sub.localWealth);
+        }
+        foreach (var t in provinces)
+        {
+            // Update localWealth for the UI/Summary
+            t.localWealth = t.subTerritories.Sum(sub => sub.localWealth);
+        }
+        foreach (var t in kingdoms)
+        {
+            // Update localWealth for the UI/Summary
+            t.localWealth = t.subTerritories.Sum(sub => sub.localWealth);
+        }
+    }
+
+    // public void ExecuteVassalAI(Territory vassalTerritory)
+    // {
+    //     if (vassalTerritory.isPlayerControlled) return; // Don't let AI spend player money
+
+    //     // If they have enough money to build something
+    //     if (vassalTerritory.personalTreasury > 500)
+    //     {
+    //         BuildingData choice = DecideBuilding(vassalTerritory.currentFocus);
+    //         // Build in a random town within this territory
+    //         Territory target = GetRandomTownRecursive(vassalTerritory);
+
+    //         vassalTerritory.personalTreasury -= choice.cost;
+    //         target.currentBuildings.Add(choice);
+    //     }
+    // }
+
+    public void KingOrderBuild(Territory targetTown, BuildingData building, bool forceVassalToPay)
+    {
+        Kingdom king = targetTown.ownerKingdom;
+
+        if (forceVassalToPay)
+        {
+            targetTown.parentTerritory.personalTreasury -= building.cost;
+            // Logic to decrease relationship/increase tyranny here
+        }
+        else
+        {
+            king.treasury -= building.cost;
+            // Logic to increase relationship (Generosity)
+        }
+
+        targetTown.currentBuildings.Add(building);
+        targetTown.RefreshUI();
     }
 }

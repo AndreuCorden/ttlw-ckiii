@@ -17,7 +17,6 @@ public class Family
     {
         familyName = name;
         headOfFamily = founder;
-        familyColor = founder.factionColor;
         members.Add(founder);
         reputation = 50;
     }

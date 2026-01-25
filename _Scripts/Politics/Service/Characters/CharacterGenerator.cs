@@ -301,11 +301,6 @@ public class CharacterGenerator : MonoBehaviour
         newChar.characterName = namePool[Random.Range(0, namePool.Length)] + " " + relation.family.familyName;
         newChar.role = role;
         newChar.family = relation.family;
-        float h, s, v;
-        Color.RGBToHSV(relation.family.familyColor, out h, out s, out v);
-        s = Mathf.Clamp(s + Random.Range(-0.25f, 0.25f), 0.3f, 1f);
-        v = Mathf.Clamp(v + Random.Range(-0.25f, 0.25f), 0.4f, 1f);
-        newChar.factionColor = Color.HSVToRGB(h, s, v);
 
         // Initial stats
         newChar.prowess = Random.Range(1, 100);
@@ -342,12 +337,21 @@ public class CharacterGenerator : MonoBehaviour
         // Safety check: if territoryName is empty
         if (string.IsNullOrEmpty(territoryName)) territoryName = "Unknown Land";
         newLeader.characterName = namePool[Random.Range(0, namePool.Length)] + territoryName;
-        newLeader.factionColor = Color.HSVToRGB(Random.value, 0.7f, 0.9f);
 
         PopulateKingdomCourt(newLeader);
         newLeader.traits = RandomTraitGenerator();
 
+        newLeader.family = CreateNewFamily(newLeader);
+
         return newLeader;
+    }
+
+    Family CreateNewFamily(CharacterData founder)
+    {
+        string surname = namePool[Random.Range(0, namePool.Length)];
+        Family family = new Family(surname, founder);
+        family.familyColor = new Color(Random.value, Random.value, Random.value);
+        return family;
     }
 
     public void PopulateKingdomCourt(CharacterData king)
@@ -379,7 +383,6 @@ public class CharacterGenerator : MonoBehaviour
                      "the Realm";
         relative.characterName = namePool[Random.Range(0, namePool.Length)] + " (" + relationType + ")";
         relative.family = character.family;
-        relative.factionColor = character.factionColor; // Same faction color as the character
         relative.role = CharacterRole.Family;
         switch (relationType)
         {
@@ -412,7 +415,6 @@ public class CharacterGenerator : MonoBehaviour
     {
         CharacterData official = ScriptableObject.CreateInstance<CharacterData>();
         official.characterName = namePool[Random.Range(0, namePool.Length)] + ": " + role.ToString() + " of " + ruler.characterName.Split(" of ")[1];
-        official.factionColor = ruler.factionColor; // Same faction color as the ruler
         official.role = role;
         official.liege = ruler;
         return official;

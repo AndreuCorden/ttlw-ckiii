@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -18,6 +19,18 @@ public class MapGenerator : MonoBehaviour
         GenerateTerrain();
         SmoothWater();
 
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (grid[x, y].type == TerritoryType.Water)
+                {
+                    // Either disable them or destroy them if you don't need them
+                    Destroy(grid[x, y].gameObject);
+                }
+            }
+        }
+
         // 1. MUST fill the land list after smoothing is done
         landTiles.Clear();
         foreach (var t in grid) if (t.type == TerritoryType.Town) landTiles.Add(t);
@@ -33,7 +46,6 @@ public class MapGenerator : MonoBehaviour
     public void FinalizeWorldGeneration(Territory playerCapital)
     {
         List<Territory> kingdomList = new List<Territory>();
-
         // This finds EVERY Territory component in the map and picks only the Kingdoms
         Territory[] allTerritories = GetComponentsInChildren<Territory>();
         foreach (Territory t in allTerritories)
@@ -44,7 +56,7 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        Debug.Log($"SocialEngine check: {socialEngine != null}. Kingdom Count: {kingdomList.Count}");
+        Debug.Log($"SocialEngine check: {socialEngine != null}. Kingdom Count: {kingdomList.Count}. Tile Count: {landTiles.Count}. Now populating world...");
 
         socialEngine.PopulateWorld(kingdomList, playerCapital);
 
@@ -55,6 +67,8 @@ public class MapGenerator : MonoBehaviour
         Debug.Log($"SocialEngine check: Done assigning capitals. Now assigning sizes and populations.");
 
         settlementEngine.AssignTerritorySizeAndPopulation(kingdomList);
+
+        settlementEngine.RunInitialEconomySimulation();
 
         foreach (Territory kingdom in kingdomList)
         {
@@ -71,27 +85,29 @@ public class MapGenerator : MonoBehaviour
         // Ensure we have land to divide
         if (landTiles.Count == 0) return;
 
-        int numKingdoms = Mathf.Clamp(landTiles.Count / 150, 2, 10);
+        int numKingdoms = landTiles.Count / 200;
         List<Territory> kingdomCapitals = GetRandomLandTiles(numKingdoms);
         var kingdomBundles = MultiFloodFill(kingdomCapitals, landTiles);
 
         foreach (var bundle in kingdomBundles)
         {
-            // CREATE KING
+            // CREATE KINGDOM
             GameObject kObj = new GameObject("Kingdom_Container");
             kObj.transform.SetParent(this.transform);
             Territory kingdom = kObj.AddComponent<Territory>();
             kingdom.type = TerritoryType.Kingdom;
-            kingdom.territoryName = "Kingdom of " + Object.FindAnyObjectByType<CharacterGenerator>().namePool[Random.Range(0, Object.FindAnyObjectByType<CharacterGenerator>().namePool.Length)];
+            kingdom.territoryColour = new Color(Random.value, Random.value, Random.value);
 
             // DIVIDE INTO PROVINCES
-            DivideIntoSubTerritories(kingdom, bundle.Value, TerritoryType.Province, 3);
+            DivideIntoSubTerritories(kingdom, bundle.Value, TerritoryType.Province);
         }
     }
 
-    void DivideIntoSubTerritories(Territory parent, List<Territory> availableTiles, TerritoryType subType, int divisions)
+    void DivideIntoSubTerritories(Territory parent, List<Territory> availableTiles, TerritoryType subType)
     {
         if (availableTiles.Count == 0) return;
+
+        int divisions = System.Math.Max(2, (int)(availableTiles.Count * UnityEngine.Random.Range(0.015f, 0.026f)));
 
         List<Territory> seeds = GetRandomTilesFromList(availableTiles, divisions);
         var bundles = MultiFloodFill(seeds, availableTiles);
@@ -105,11 +121,16 @@ public class MapGenerator : MonoBehaviour
             sub.type = subType;
             sub.parentTerritory = parent;
             sub.territoryName = subType.ToString() + " of " + parent.territoryName;
+            float h, s, v;
+            Color.RGBToHSV(parent.territoryColour, out h, out s, out v);
+            s = Mathf.Clamp(s + Random.Range(-0.25f, 0.25f), 0.3f, 1f);
+            v = Mathf.Clamp(v + Random.Range(-0.25f, 0.25f), 0.4f, 1f);
+            sub.territoryColour = Color.HSVToRGB(h, s, v);
 
             if (subType == TerritoryType.Province)
             {
                 // KEEP GOING DOWN
-                DivideIntoSubTerritories(sub, bundle.Value, TerritoryType.County, 3);
+                DivideIntoSubTerritories(sub, bundle.Value, TerritoryType.County);
             }
             else if (subType == TerritoryType.County)
             {
@@ -122,6 +143,10 @@ public class MapGenerator : MonoBehaviour
                     // Final check to make sure name and color are set on the tile
                     townTile.territoryName = "Town of " + parent.territoryName;
                     sub.subTerritories.Add(townTile);
+                    Color.RGBToHSV(sub.territoryColour, out h, out s, out v);
+                    s = Mathf.Clamp(s + Random.Range(-0.25f, 0.25f), 0.3f, 1f);
+                    v = Mathf.Clamp(v + Random.Range(-0.25f, 0.25f), 0.4f, 1f);
+                    townTile.territoryColour = Color.HSVToRGB(h, s, v);
                 }
             }
             parent.subTerritories.Add(sub);
@@ -167,8 +192,14 @@ public class MapGenerator : MonoBehaviour
         {
             if (!claimLookup.ContainsKey(t))
             {
-                // Find the closest seed or just add to the first kingdom
-                assignments[seeds[0]].Add(t);
+                Territory closestSeed = null;
+                float minDst = float.MaxValue;
+                foreach (var seed in seeds)
+                {
+                    float dst = Vector3.Distance(t.transform.position, seed.transform.position);
+                    if (dst < minDst) { minDst = dst; closestSeed = seed; }
+                }
+                assignments[closestSeed].Add(t);
             }
         }
 

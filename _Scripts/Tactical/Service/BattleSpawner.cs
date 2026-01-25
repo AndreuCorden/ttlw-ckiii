@@ -32,8 +32,8 @@ public class BattleSpawner : MonoBehaviour
 
         // Setup Model
         Unit unit = go.GetComponent<Unit>();
-        unit.currentHealth = stack.unitType.maxHealth;
-        unit.maxHealth = stack.unitType.maxHealth;
+        unit.currentHealth = stack.currentSoldierCount;
+        unit.maxHealth = stack.maxSoldierCount;
         unit.teamColor = color;
         unit.isPlayerUnit = isPlayer;
 
