@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using NUnit.Framework.Interfaces;
 
 [CreateAssetMenu(fileName = "NewCharacter", menuName = "Social/Character")]
 public class CharacterData : ScriptableObject
@@ -11,15 +12,6 @@ public class CharacterData : ScriptableObject
     public int prowess; // Combat skill
     public int age;
     public int influence;
-
-    [Header("Political Standings")]
-    public int loyalty = 50;  // 0-100
-    public int respect = 50;  // How much people like you
-    public int dread = 0;     // How much people fear you
-
-    [Header("Relationships")]
-    public bool isAlliedWithPlayer;
-    public int opinionOfPlayer = 0; // -100 to 100
 
     [Header("Dynamics")]
     public List<Trait> traits = new List<Trait>();
@@ -39,6 +31,9 @@ public class CharacterData : ScriptableObject
     public List<CharacterData> retinue = new List<CharacterData>();
 
     public CharacterRole role; // Add an Enum for: Ruler, General, Priest, etc.
+
+    [Header("Social Network")]
+    public List<CharacterData> knownCharacters = new List<CharacterData>();
 
     // A helper function to get the "Total" of a stat including traits
     public int GetTotalProwess()
@@ -60,7 +55,53 @@ public class CharacterData : ScriptableObject
         return false;
     }
 
-    public System.Collections.Generic.List<ArmyUnitData> army = new List<ArmyUnitData>();
+    public bool CanInteractWithPlayer(CharacterData player)
+    {
+        // 1. Are they in the same family?
+        if (family == player.family) return true;
+
+        // 2. Are they in a Feudal relationship?
+        if (IsVassalOf(player) || IsLiegeOf(player)) return true;
+
+        // 3. Are they in the same court? (Retinue/Council)
+        if (player.retinue.Contains(this)) return true;
+
+        // 4. Have they been introduced?
+        if (knownCharacters.Contains(player)) return true;
+
+        return false;
+    }
+
+    public bool IsVassalOf(CharacterData player)
+    {
+        bool isVassalOf = false;
+        foreach (Title title in heldTitles)
+        {
+            foreach (Title vassal in title.vassals)
+            {
+                if (player == vassal)
+                {
+                    isVassalOf = true;
+                }
+            }
+        }
+        return isVassalOf;
+    }
+
+    public bool IsLiegeOf(CharacterData player)
+    {
+        bool isLiegeOf = false;
+        foreach (Title title in heldTitles)
+        {
+            if (player == title.liege)
+            {
+                isLiegeOf = true;
+            }
+        }
+        return isLiegeOf;
+    }
+
+    public List<ArmyUnitData> army = new List<ArmyUnitData>();
 }
 
 public enum CharacterRole { Ruler, Knight, Priest, Merchant, Diplomat, Courtier, Family }

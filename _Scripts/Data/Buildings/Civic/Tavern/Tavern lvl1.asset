@@ -14,9 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BuildingData
   buildingName: Tavern
   icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  cost: 500
+  cost: 50
   level: 1
   nextUpgrade: {fileID: 11400000, guid: a4ff8845d9efc3e4ca1ea096dad8abe7, type: 2}
   previousLevel: {fileID: 0}
+  townHallLevelRequired: {fileID: 11400000, guid: d809c3aa35ace3844a5477326b4cab91, type: 2}
   effects:
   - {fileID: 11400000, guid: 2edfed74710fa5148afb39d99b2ea192, type: 2}

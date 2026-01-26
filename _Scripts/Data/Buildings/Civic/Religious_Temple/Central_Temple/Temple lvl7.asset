@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9653f674aa499b34885fde43b0c480fa, type: 3}
-  m_Name: Town Hall lvl8
+  m_Name: Temple lvl7
   m_EditorClassIdentifier: Assembly-CSharp::BuildingData
-  buildingName: Town Hall
+  buildingName: Temple
   icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  cost: 7500
-  level: 8
-  nextUpgrade: {fileID: 11400000, guid: 5844291115206114da033cb138d06d21, type: 2}
-  previousLevel: {fileID: 11400000, guid: 964e412de1acce34aa8f0e625cfea561, type: 2}
+  cost: 2500
+  level: 7
+  nextUpgrade: {fileID: 11400000, guid: 3f9f8f479187bb5419e30e3d91b06b5e, type: 2}
+  previousLevel: {fileID: 11400000, guid: f2a626dc68ba9b3429c01e31225486e8, type: 2}
+  townHallLevelRequired: {fileID: 11400000, guid: 964e412de1acce34aa8f0e625cfea561, type: 2}
   effects:
   - {fileID: 11400000, guid: 231f9b575578ec042b05f0f60b308c25, type: 2}

@@ -65,6 +65,8 @@ public class MapGenerator : MonoBehaviour
 
         socialEngine.PopulateWorld(kingdomList, playerTitle);
 
+        socialEngine.SetRelationships(Object.FindAnyObjectByType<CharacterData>());
+
         settlementEngine.MarkAsCapital(kingdomList);
 
         Debug.Log($"SocialEngine check: Done assigning capitals. Now assigning sizes and populations.");

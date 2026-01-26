@@ -27,16 +27,6 @@ public class PoliticsController : MonoBehaviour
         CharacterData opponent = GlobalGameManager.Instance.defender;
         bool won = GlobalGameManager.Instance.lastBattleWon;
 
-        if (won)
-        {
-            opponent.loyalty -= 20;
-            GlobalGameManager.Instance.ChangeOpinion(opponent, -30);
-        }
-        else
-        {
-            opponent.loyalty += 10;
-        }
-
         // Clean up
         GlobalGameManager.Instance.defender = null;
     }

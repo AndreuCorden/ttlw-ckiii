@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "New Building", menuName = "Politics/Building")]
+[CreateAssetMenu(fileName = "New Building", menuName = "Politics/Building/GenericBuilding")]
 public class BuildingData : ScriptableObject, IDescribable
 {
     public string buildingName;
@@ -10,7 +10,6 @@ public class BuildingData : ScriptableObject, IDescribable
     public int level;
     public BuildingData nextUpgrade; // Link to the next level
     public BuildingData previousLevel; // Link to the previous level
-    public BuildingData townHallLevelRequired;
 
     [Header("Building Effects")]
     public List<BuildingEffect> effects = new List<BuildingEffect>();

@@ -1,108 +1,145 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class TownDisplay : MonoBehaviour
 {
+    [Header("Main View (Current Buildings)")]
     public GameObject displayPanel;
     public TextMeshProUGUI townNameText;
-    public TextMeshProUGUI statusText; // e.g., "Provincial Capital"
-    public TextMeshProUGUI sizeText;   // e.g., "City"
-    public GameObject buildingPrefab;
+    public TextMeshProUGUI statusText;
+    public TextMeshProUGUI sizeText;
+    public GameObject buildingPrefab; // Prefab for buildings already built
     public Transform buildingParent;
+
+    [Header("Build Menu (Construction)")]
+    public GameObject buildViewPanel; // The Panel that shows possible builds
+    public GameObject buildingButtonPrefab; // Prefab for the build buttons
+    public Transform buildMenuContainer; // The Content object for the buttons
+
+    private Territory currentOpenedTown;
+    public BuildingLibrary buildingLibrary;
+
+    // --- MAIN DISPLAY LOGIC ---
 
     public void OpenTownDisplay(Territory town)
     {
         if (town == null || town.territoryType != TerritoryType.Land) return;
+        currentOpenedTown = town;
 
         townNameText.text = town.territoryName;
         sizeText.text = $"Settlement Type: {town.size}";
 
-        if (town.isCapital)
-        {
-            statusText.text = "Strategic Importance: REGIONAL CAPITAL";
-            statusText.color = Color.yellow;
-        }
-        else
-        {
-            statusText.text = "Strategic Importance: Standard Settlement";
-            statusText.color = Color.white;
-        }
+        // Set Strategic Importance
+        statusText.text = town.isCapital ? "Strategic Importance: REGIONAL CAPITAL" : "Strategic Importance: Standard Settlement";
+        statusText.color = town.isCapital ? Color.yellow : Color.white;
 
-        foreach (Transform child in buildingParent)
-        {
-            Destroy(child.gameObject);
-        }
+        RefreshCurrentBuildings();
+        displayPanel.SetActive(true);
+    }
 
-        // 2. Spawn a new slot for every building the town actually has
-        // Inside TownDisplay.cs
-        foreach (BuildingData building in town.currentBuildings)
+    private void RefreshCurrentBuildings()
+    {
+        foreach (Transform child in buildingParent) Destroy(child.gameObject);
+
+        foreach (BuildingData building in currentOpenedTown.currentBuildings)
         {
             GameObject newSlot = Instantiate(buildingPrefab, buildingParent);
 
-            // 1. Set the visuals (The Script that handles the Icon/Text inside the slot)
             if (newSlot.TryGetComponent<BuildingSlotUI>(out var slotUI))
-            {
                 slotUI.SetBuilding(building);
-            }
 
-            // 2. Set the Tooltip (The Script that handles the Hovering)
             if (newSlot.TryGetComponent<HoverTooltipTrigger>(out var trigger))
-            {
-                trigger.Setup(building); // This works because BuildingData is an IDescribable
-            }
+                trigger.Setup(building);
         }
-
-
-        displayPanel.SetActive(true);
-
     }
 
     public void CloseDisplay()
     {
         displayPanel.SetActive(false);
+        buildViewPanel.SetActive(false);
     }
 
-    // public void RefreshBuildMenu(Territory selectedTerritory)
-    // {
-    //     // 1. Find the current Town Hall level of this territory
-    //     int currentTHLevel = selectedTerritory.GetBuildingLevel("Town Hall");
+    // --- CONSTRUCTION MENU LOGIC ---
 
-    //     // 2. Clear your current UI list
-    //     foreach (Transform child in buildMenuContainer) Destroy(child.gameObject);
+    public void OpenBuildMenu()
+    {
+        if (currentOpenedTown == null) return;
 
-    //     // 3. Loop through your master list of all possible buildings
-    //     foreach (BuildingData building in settlementEngine.allPossibleBuildings)
-    //     {
-    //         // Instantiate a button for this building
-    //         GameObject btnObj = Instantiate(buildingButtonPrefab, buildMenuContainer);
-    //         BuildButton script = btnObj.GetComponent<BuildButton>();
+        buildViewPanel.SetActive(true);
+        RefreshBuildMenu(currentOpenedTown);
+    }
 
-    //         bool isUnlocked = currentTHLevel >= building.townHallLevelRequired;
+    public void RefreshBuildMenu(Territory selectedTerritory)
+    {
+        foreach (Transform child in buildMenuContainer) Destroy(child.gameObject);
 
-    //         // Setup the button visuals
-    //         script.Setup(building, isUnlocked);
+        foreach (BuildingData building in selectedTerritory.buildableBuildings)
+        {
+            GameObject btnObj = Instantiate(buildingButtonPrefab, buildMenuContainer);
+            BuildButton script = btnObj.GetComponent<BuildButton>();
 
-    //         // If locked, maybe make the button non-interactable or grayed out
-    //         btnObj.GetComponent<Button>().interactable = isUnlocked;
-    //     }
-    // }
+            // Comparison happens here: The library doesn't need to know the buildings,
+            // because the building knows its own requirement.
 
-    // public void TryBuild(BuildingData building, Territory t)
-    // {
-    //     int currentTH = t.GetBuildingLevel("Town Hall");
+            script.Setup(building, selectedTerritory);
+        }
+    }
 
-    //     if (currentTH < building.townHallLevelRequired)
-    //     {
-    //         Debug.Log("Town Hall level too low!");
-    //         return;
-    //     }
+    public void TryUpgradeTownHall(Territory t)
+    {
+        int currentLevel = t.GetBuildingLevel("Town Hall");
+        int nextLevelIndex = currentLevel; // If current level is 1 (index 0), next is index 1
 
-    //     if (t.owner.gold >= building.goldCost)
-    //     {
-    //         t.owner.gold -= building.goldCost;
-    //         t.AddBuilding(building);
-    //         RefreshBuildMenu(t); // Update the UI
-    //     }
-    // }
+        if (nextLevelIndex < buildingLibrary.townHallLevels.Count)
+        {
+            BuildingData nextTH = buildingLibrary.townHallLevels[nextLevelIndex];
+
+            if (t.owner.personalTreasury >= nextTH.cost)
+            {
+                t.owner.personalTreasury -= nextTH.cost;
+                t.AddBuilding(nextTH); // Your AddBuilding logic handles replacing the old one
+
+                RefreshCurrentBuildings();
+                RefreshBuildMenu(t);
+            }
+        }
+        else
+        {
+            Debug.Log("Town Hall is already at Max Level!");
+        }
+    }
+
+    public void TryBuild(BuildingData building, Territory t)
+    {
+        int currentTH = t.GetBuildingLevel("Town Hall");
+
+        // Fixed: Check level and cost correctly
+        if (currentTH < building.level) // Also need to change for townhalllevel
+        {
+            Debug.Log("Town Hall level too low!");
+            return;
+        }
+
+        // Assuming Title.holder has the treasury
+        if (t.owner.personalTreasury >= building.cost)
+        {
+            t.owner.personalTreasury -= building.cost;
+            t.AddBuilding(building);
+
+            // Refresh both UIs
+            RefreshCurrentBuildings();
+            RefreshBuildMenu(t);
+        }
+        else
+        {
+            Debug.Log("Not enough gold!");
+        }
+    }
+
+    public void CloseBuildDisplay()
+    {
+        buildViewPanel.SetActive(false);
+    }
 }

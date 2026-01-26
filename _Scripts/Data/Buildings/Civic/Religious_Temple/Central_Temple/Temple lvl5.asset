@@ -14,9 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BuildingData
   buildingName: Temple
   icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  cost: 2500
+  cost: 1250
   level: 5
-  nextUpgrade: {fileID: 0}
+  nextUpgrade: {fileID: 11400000, guid: f2a626dc68ba9b3429c01e31225486e8, type: 2}
   previousLevel: {fileID: 11400000, guid: a0770dd1af867074ea665e0b609a730d, type: 2}
+  townHallLevelRequired: {fileID: 11400000, guid: 0dc6eb8eb3da89349971df9ac1c00413, type: 2}
   effects:
   - {fileID: 11400000, guid: c4776705bdbf3484a849391f527839c5, type: 2}

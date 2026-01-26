@@ -8,6 +8,7 @@ public class CharacterDisplay : MonoBehaviour
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI statsText;
     public TextMeshProUGUI armyText;
+    public GameObject diplomacyButton;
     public GameObject battleButton; // Drag the BattleButton here in Inspector
 
     public DiplomacyUI diplomacyWindow; // Drag your DiplomacyPanel here in the Inspector
@@ -24,10 +25,10 @@ public class CharacterDisplay : MonoBehaviour
     public void UpdateUI()
     {
         nameText.text = characterToDisplay.characterName;
-        statsText.text = $"Prowess: {characterToDisplay.prowess} | Loyalty: {characterToDisplay.loyalty}%";
+        statsText.text = $"Prowess: {characterToDisplay.prowess}";
 
         // If loyalty is 0 or less, show the battle button and change text color
-        if (characterToDisplay.loyalty <= 0)
+        if ((characterToDisplay.prowess + 1) <= 0)
         {
             battleButton.SetActive(true);
             statsText.text = "STATE: IN REBELLION!";
@@ -37,6 +38,16 @@ public class CharacterDisplay : MonoBehaviour
         {
             battleButton.SetActive(false);
             statsText.color = Color.white;
+        }
+
+        CharacterData player = PlayerManager.Instance.playerCharacter;
+        if ( characterToDisplay == player)
+        {
+            diplomacyButton.SetActive(false);
+        }
+        else
+        {
+            diplomacyButton.SetActive(true);
         }
 
         // Count total soldiers in the army

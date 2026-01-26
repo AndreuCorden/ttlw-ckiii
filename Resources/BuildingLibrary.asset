@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: BuildingLibrary
   m_EditorClassIdentifier: Assembly-CSharp::BuildingLibrary
   townHallLevels:
-  - {fileID: 11400000, guid: d809c3aa35ace3844a5477326b4cab91, type: 2}
-  - {fileID: 11400000, guid: a08c330356bec754383b65de2710e4d6, type: 2}
-  - {fileID: 11400000, guid: a97566a4f309dc940a9c8104c0162e31, type: 2}
-  - {fileID: 11400000, guid: e1f517d26db7ea2499825906ce6850be, type: 2}
-  - {fileID: 11400000, guid: 0dc6eb8eb3da89349971df9ac1c00413, type: 2}
-  - {fileID: 11400000, guid: f7710513998bf114f8ebefa729c6f303, type: 2}
-  - {fileID: 11400000, guid: 964e412de1acce34aa8f0e625cfea561, type: 2}
-  - {fileID: 11400000, guid: 38e2f413255871c44b6d8aa8b45efe7c, type: 2}
-  - {fileID: 11400000, guid: 5844291115206114da033cb138d06d21, type: 2}
+  - {fileID: 11400000, guid: 078127e4013c5c147b86442ff5ab587d, type: 2}
+  - {fileID: 11400000, guid: 8993544e029884e4688ac81cca9112a1, type: 2}
+  - {fileID: 11400000, guid: bfa50bb15696e0541bcffcc9ad745c98, type: 2}
+  - {fileID: 11400000, guid: a1a3dbe977a9718408f3dc8d6b703b2e, type: 2}
+  - {fileID: 11400000, guid: 221fa64c48455994fb3fa8d943dc2a07, type: 2}
+  - {fileID: 11400000, guid: d9ffdc093b463e44683ef05748057da6, type: 2}
+  - {fileID: 11400000, guid: 470ec3fc9ca6ccb42b20eebc3532e098, type: 2}
+  - {fileID: 11400000, guid: 9e3d784891580ac42bad17b1b7352ec1, type: 2}
+  - {fileID: 11400000, guid: f6c4b43fa66518f47928417e46cd31a1, type: 2}
   allPossibleBuildings:
   - {fileID: 11400000, guid: 44eac0e16ec0778469a53573a4b36939, type: 2}
   - {fileID: 11400000, guid: 1e30b5f4d30571b41b9f0aa15b6734a2, type: 2}

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.UIElements;
+using Unity.VisualScripting;
 
 public class SettlementEngine : MonoBehaviour
 {
@@ -114,8 +114,9 @@ public class SettlementEngine : MonoBehaviour
         }
 
         // Always add the Town Hall of appropriate level
-        BuildingData townHall = buildingLibrary.townHallLevels[Mathf.Clamp((int)t.size, 0, buildingLibrary.townHallLevels.Count - 1)];
+        TownHallData townHall = buildingLibrary.townHallLevels[Mathf.Clamp((int)t.size, 0, buildingLibrary.townHallLevels.Count - 1)];
         t.currentBuildings.Add(townHall);
+        t.buildableBuildings = GetAllBuildable(townHall);
 
         // Add additional buildings based on size
         int additionalBuildings = System.Math.Min((int)t.size, buildingLibrary.allPossibleBuildings.Count); // More buildings for larger settlements
@@ -141,6 +142,23 @@ public class SettlementEngine : MonoBehaviour
             }
             numRep++;
         }
+    }
+
+    public List<BuildingData> GetAllBuildable(TownHallData townHallData)
+    {
+        List<BuildingData> buildingDatas = new List<BuildingData>();
+        foreach (BuildingData buildingData in townHallData.unlockedBuildings)
+        {
+            if (buildingDatas.FirstOrDefault(b => b.buildingName == buildingData.buildingName) == null)
+            {
+                buildingDatas.Add(buildingData);
+            }
+        }
+        if (townHallData.prev != null)
+        {
+            buildingDatas.AddRange(GetAllBuildable(townHallData.prev));
+        }
+        return buildingDatas;
     }
 
     public void RunInitialEconomySimulation()

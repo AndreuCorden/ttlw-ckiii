@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 public class SocialEngine : MonoBehaviour
 {
@@ -44,16 +43,17 @@ public class SocialEngine : MonoBehaviour
         else if (isRelative)
         {
             ruler = charGen.GenerateFamilyCharacter(CharacterRole.Ruler, liege);
+            ruler.heldTitles.Add(territory);
         }
         else
         {
             ruler = charGen.GenerateRandomLeader(" of " + charGen.namePool[Random.Range(0, charGen.namePool.Length)]);
             ruler.family.familyColor = new Color(Random.value, Random.value, Random.value);
+            ruler.heldTitles.Add(territory);
         }
 
         // Create the Ruler for this level (Duke, Count, or Mayor)
         territory.holder = ruler;
-        ruler.heldTitles.Add(territory);
         ruler.role = CharacterRole.Ruler;
 
         // Keep going down the hierarchy
@@ -61,6 +61,46 @@ public class SocialEngine : MonoBehaviour
         {
             // Further down, the chance of being a relative of the KING decreases
             ProcessTerritory(sub, ruler, 0.2f);
+        }
+    }
+
+    public void InitializeWorldSocialWeb()
+    {
+        CharacterData[] allCharactersInWorld = Resources.LoadAll<CharacterData>("Characters");
+        foreach (CharacterData character in allCharactersInWorld)
+        {
+            SetRelationships(character);
+        }
+    }
+
+    public void SetRelationships(CharacterData character)
+    {
+        if (character == null) return;
+
+        // 1. Link to Family (Blood Connections)
+        if (character.father != null) 
+            RelationshipManager.Instance.GetRelationship(character, character.father);
+        
+        if (character.mother != null) 
+            RelationshipManager.Instance.GetRelationship(character, character.mother);
+
+        foreach (CharacterData child in character.children)
+            RelationshipManager.Instance.GetRelationship(character, child);
+
+        // 2. Link to Feudal Ties (Liege/Vassals)
+        foreach (Title title in character.heldTitles)
+        {
+            if (title.liege != null && title.liege.holder != null)
+            {
+                // Establishing the "Legal" connection
+                Relationship rel = RelationshipManager.Instance.GetRelationship(character, title.liege.holder);
+            }
+        }
+        
+        // 3. Link to Retinue (The Inner Circle)
+        foreach (CharacterData member in character.retinue)
+        {
+            RelationshipManager.Instance.GetRelationship(character, member);
         }
     }
 }

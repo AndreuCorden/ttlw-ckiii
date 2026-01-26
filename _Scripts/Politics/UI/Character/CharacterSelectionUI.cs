@@ -38,7 +38,10 @@ public class CharacterSelectionUI : MonoBehaviour
 
         // 4. NAVIGATION: GO UP (Hierarchy)
         foreach (Title liege in character.heldTitles)
-            if ( liege.liege != null) CreateButton("↑ LIEGE: " + liege.liege.holder.characterName, () => SelectCharacter(liege.liege.holder));
+        {
+            Debug.Log(liege.rank);
+            if (liege.liege != null) CreateButton("↑ LIEGE: " + liege.liege.holder.characterName, () => SelectCharacter(liege.liege.holder));
+        }
 
         // // 5. NAVIGATION: GO DOWN (Vassals/Land)
         foreach (Title title in character.heldTitles)

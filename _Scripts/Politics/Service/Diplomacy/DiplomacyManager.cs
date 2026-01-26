@@ -19,26 +19,9 @@ public class DiplomacyManager
     // Constructor is private so no one else can 'new' it up
     private DiplomacyManager() { }
 
-    public void ProposeAlliance(CharacterData target)
-    {
-        // Get the opinion from the Global Manager
-        int opinion = GlobalGameManager.Instance.GetOpinion(target);
-
-        if (opinion > 50 && !target.isAlliedWithPlayer)
-        {
-            target.isAlliedWithPlayer = true;
-            Debug.Log("Alliance Formed!");
-        }
-        else
-        {
-            Debug.Log("They refused the alliance.");
-        }
-    }
-
     public void GiveGift(CharacterData target)
     {
         int baseOpinion = 10;
-        int loyaltyBonus = 10;
 
         // Use Enums for clean logic
         foreach (Trait t in target.traits)
@@ -51,16 +34,31 @@ public class DiplomacyManager
         {
             baseOpinion += 5; // Religious bonus
         }
-
-        target.loyalty += loyaltyBonus;
-        if (target.loyalty > 100) target.loyalty = 100;
-
-        GlobalGameManager.Instance.ChangeOpinion(target, baseOpinion);
     }
 
     public void SendInsult(CharacterData characterToDisplay)
     {
-        characterToDisplay.loyalty -= 20;
-        if (characterToDisplay.loyalty < 0) characterToDisplay.loyalty = 0;
+    }
+
+    public void StartContactMission(CharacterData sender, CharacterData target)
+    {
+        // Costs Influence or Gold to send a diplomat
+        if (sender.influence >= 20)
+        {
+            sender.influence -= 20;
+            // In a real game, this might take 10 days to complete
+            CompleteContact(sender, target);
+        }
+    }
+
+    private void CompleteContact(CharacterData sender, CharacterData target)
+    {
+        if (!target.knownCharacters.Contains(sender))
+            target.knownCharacters.Add(sender);
+            
+        if (!sender.knownCharacters.Contains(target))
+            sender.knownCharacters.Add(target);
+
+        Debug.Log($"Connections formed between {sender.characterName} and {target.characterName}");
     }
 }

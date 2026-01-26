@@ -18,5 +18,6 @@ MonoBehaviour:
   level: 5
   nextUpgrade: {fileID: 0}
   previousLevel: {fileID: 11400000, guid: 49f319f53c3cbfa4fb9e5b4a69d8e5ec, type: 2}
+  townHallLevelRequired: {fileID: 11400000, guid: 5844291115206114da033cb138d06d21, type: 2}
   effects:
   - {fileID: 11400000, guid: c63889b746bd6fa40a1e31d6794903b4, type: 2}

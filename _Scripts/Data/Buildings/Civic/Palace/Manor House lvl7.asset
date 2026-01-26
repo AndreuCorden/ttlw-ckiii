@@ -10,14 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9653f674aa499b34885fde43b0c480fa, type: 3}
-  m_Name: Town Hall lvl4
+  m_Name: Manor House lvl7
   m_EditorClassIdentifier: Assembly-CSharp::BuildingData
-  buildingName: Town Hall
+  buildingName: Manor House
   icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  cost: 1000
-  level: 4
-  nextUpgrade: {fileID: 11400000, guid: 0dc6eb8eb3da89349971df9ac1c00413, type: 2}
-  previousLevel: {fileID: 11400000, guid: a97566a4f309dc940a9c8104c0162e31, type: 2}
-  effects:
-  - {fileID: 11400000, guid: d2e17680e09276e42ba60567d3c59fb8, type: 2}
-  - {fileID: 11400000, guid: 46016d3040a55404381b9d80bc1048e1, type: 2}
+  cost: 15000
+  level: 7
+  nextUpgrade: {fileID: 0}
+  previousLevel: {fileID: 11400000, guid: 781289a05aa3d1c4396034f5a5df8740, type: 2}
+  townHallLevelRequired: {fileID: 11400000, guid: 5844291115206114da033cb138d06d21, type: 2}
+  effects: []

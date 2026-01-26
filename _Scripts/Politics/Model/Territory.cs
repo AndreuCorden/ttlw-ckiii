@@ -21,6 +21,7 @@ public class Territory : MonoBehaviour
 
     [Header("Infrastructure")]
     public List<BuildingData> currentBuildings = new List<BuildingData>();
+    public List<BuildingData> buildableBuildings = new List<BuildingData>();
     public float instability = 0;
 
     [Header("Adjacency")]
@@ -76,16 +77,46 @@ public class Territory : MonoBehaviour
 
     public float GetGoldPerTurn() // Changed to float to prevent rounding errors
     {
-            float total = 0;
-            foreach (var b in currentBuildings)
-            {
-                total += b.GetGoldPerTurn();
-            }
-            // Add the population tax here too so it's included in the "Town's output"
-            total += population / 100f;
-            localWealth = Mathf.RoundToInt(total);
-            return total;
+        float total = 0;
+        foreach (var b in currentBuildings)
+        {
+            total += b.GetGoldPerTurn();
+        }
+        // Add the population tax here too so it's included in the "Town's output"
+        total += population / 100f;
+        localWealth = Mathf.RoundToInt(total);
+        return total;
     }
+
+    public void AddBuilding(BuildingData buildingData)
+    {
+        // 1. Find the existing building if it exists
+        // We use FirstOrDefault to get the actual object reference
+        var existingBuilding = currentBuildings.FirstOrDefault(b => b.buildingName == buildingData.buildingName);
+
+        if (existingBuilding != null)
+        {
+            // 2. Remove the old version (useful for upgrading levels/stats)
+            currentBuildings.Remove(existingBuilding);
+        }
+
+        // 3. Add the new building data
+        currentBuildings.Add(buildingData);
+    }
+
+    // Inside Territory.cs
+    // public bool MeetsRequirements(BuildingData b)
+    // {
+    //     if (GetBuildingLevel("Town Hall") < b.townHallLevelRequired.level) return false;
+    //     if (this.population < b.requiredPopulation) return false;
+
+    //     if (!string.IsNullOrEmpty(b.prerequisiteBuildingName))
+    //     {
+    //         if (GetBuildingLevel(b.prerequisiteBuildingName) < 1) return false;
+    //     }
+
+    //     return true;
+    // }
 }
 
 public enum SettlementSize { Hamlet, Village, BigVillage, SmallTown, MarketTown, Borough, BigTown, SmallCity, City }
