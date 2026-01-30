@@ -349,7 +349,8 @@ public class CharacterGenerator : MonoBehaviour
     Family CreateNewFamily(CharacterData founder)
     {
         string surname = namePool[Random.Range(0, namePool.Length)];
-        Family family = new Family(surname, founder);
+        Family family = ScriptableObject.CreateInstance<Family>();
+        family.Initialize(surname, founder);
         family.familyColor = new Color(Random.value, Random.value, Random.value);
         return family;
     }
@@ -425,7 +426,7 @@ public class CharacterGenerator : MonoBehaviour
         for (int i = 0; i < numberOfTraits; i++)
         {
             Trait randomTrait = ScriptableObject.CreateInstance<Trait>();
-            randomTrait.traitType = (TraitEnum) Random.Range((int) TraitEnum.Ambitious, (int) TraitEnum.Philosophical + 1);
+            randomTrait.traitType = (TraitEnum)Random.Range((int)TraitEnum.Ambitious, (int)TraitEnum.Philosophical + 1);
             randomTrait.traitName = randomTrait.traitType.ToString();
             randomTrait.description = "Description for " + randomTrait.name;
             randomTrait.loyaltyMod = 10;

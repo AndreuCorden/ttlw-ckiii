@@ -80,6 +80,8 @@ public class MapGenerator : MonoBehaviour
         Debug.Log($"Map generation complete. Updating map visuals.");
 
         Object.FindAnyObjectByType<MapManager>().UpdateMapVisuals();
+        Object.FindAnyObjectByType<PlayerManager>().UpdateCharacterParameters();
+        Object.FindAnyObjectByType<PlayerManager>().SetActiveParameterView();
     }
 
     public Title CreateTitle(string prefix, TitleRank rank, Title liege)

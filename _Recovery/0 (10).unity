@@ -9959,14 +9959,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
   playerCharacter: {fileID: 0}
-  playerFamily:
-    familyName: 
-    familyColor: {r: 0, g: 0, b: 0, a: 0}
-    members: []
-    alliedFamilies: []
-    headOfFamily: {fileID: 0}
-    reputation: 0
-    influence: 0
+  playerFamily: {fileID: 0}
   Name: {fileID: 1134705149}
   Role: {fileID: 136934729}
   Gold: {fileID: 485106972}

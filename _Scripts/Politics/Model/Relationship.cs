@@ -1,9 +1,15 @@
 [System.Serializable]
 public class Relationship
 {
-    public int opinion = 0;   // -100 to 100
-    public int trust = 0;     // 0 to 100
-    public int fear = 0;      // 0 to 100
+    [System.Serializable]
+    public struct CharRelationship
+    {
+        public int opinion;
+        public int trust;
+        public int fear;
+    };
+    public CharRelationship charA;
+    public CharRelationship charB;
     
     // You can add "flags" for medieval status
     public bool isAtWar = false;

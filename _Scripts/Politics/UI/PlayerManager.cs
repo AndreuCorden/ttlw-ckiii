@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -8,6 +9,14 @@ public class PlayerManager : MonoBehaviour
     public CharacterData playerCharacter;
     public Family playerFamily;
     private string pendingKingdomName;
+
+    public TextMeshProUGUI Name;
+    public TextMeshProUGUI Role;
+    public TextMeshProUGUI Gold;
+    public TextMeshProUGUI Prowess;
+    public TextMeshProUGUI Influence;
+
+    public GameObject parameterView;
 
     void Awake() => Instance = this;
 
@@ -21,8 +30,11 @@ public class PlayerManager : MonoBehaviour
         pendingKingdomName = kingdomName;
 
         // 2. Create the Family
-        playerFamily = new Family(lastName, playerCharacter);
+        Family playerFamily = ScriptableObject.CreateInstance<Family>();
+        playerFamily.Initialize(lastName, playerCharacter);
         playerCharacter.family = playerFamily;
+
+        Object.FindAnyObjectByType<GlobalGameManager>().playerData = playerCharacter;
 
         Debug.Log($"Created {firstName} {lastName}. Now select a territory on the map.");
     }
@@ -63,5 +75,19 @@ public class PlayerManager : MonoBehaviour
         }
 
         return titleToAssign;
+    }
+
+    public void SetActiveParameterView()
+    {
+        parameterView.SetActive(true);
+    }
+
+    public void UpdateCharacterParameters()
+    {
+        Name.text = playerCharacter.characterName;
+        Role.text = playerCharacter.GetHighestRank().ToString();
+        Gold.text = playerCharacter.GetGold().ToString();
+        Prowess.text = playerCharacter.prowess.ToString();
+        Influence.text = playerCharacter.influence.ToString();
     }
 }

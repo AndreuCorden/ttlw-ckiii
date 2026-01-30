@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class RelationshipManager : MonoBehaviour
@@ -24,9 +25,12 @@ public class RelationshipManager : MonoBehaviour
         if (!relationshipDatabase.ContainsKey(key))
         {
             Relationship relationship = new Relationship();
-            relationship.fear = 0;
-            relationship.opinion = 50;
-            relationship.trust = 50;
+            relationship.charA.fear = 0;
+            relationship.charA.opinion = 0;
+            relationship.charA.trust = 0;
+            relationship.charB.fear = 0;
+            relationship.charB.opinion = 0;
+            relationship.charB.trust = 0;
             relationshipDatabase.Add(key, relationship);
         }
         return relationshipDatabase[key];
@@ -35,6 +39,78 @@ public class RelationshipManager : MonoBehaviour
     public void ChangeOpinion(CharacterData actor, CharacterData target, int amount)
     {
         Relationship rel = GetRelationship(actor, target);
-        rel.opinion = Mathf.Clamp(rel.opinion + amount, -100, 100);
+        if (actor.GetInstanceID() < target.GetInstanceID())
+        {
+            rel.charA.opinion = Mathf.Clamp(rel.charA.opinion + amount, -100, 100);
+        }
+        else
+        {
+            rel.charB.opinion = Mathf.Clamp(rel.charB.opinion + amount, -100, 100);
+        }
+    }
+
+    public void ChangeTrust(CharacterData actor, CharacterData target, int amount)
+    {
+        Relationship rel = GetRelationship(actor, target);
+        if (actor.GetInstanceID() < target.GetInstanceID())
+        {
+            rel.charA.trust = Mathf.Clamp(rel.charA.opinion + amount, -100, 100);
+        }
+        else
+        {
+            rel.charB.trust = Mathf.Clamp(rel.charB.opinion + amount, -100, 100);
+        }
+    }
+
+    public void ChangeFear(CharacterData actor, CharacterData target, int amount)
+    {
+        Relationship rel = GetRelationship(actor, target);
+        if (actor.GetInstanceID() < target.GetInstanceID())
+        {
+            rel.charA.fear = Mathf.Clamp(rel.charA.opinion + amount, -100, 100);
+        }
+        else
+        {
+            rel.charB.fear = Mathf.Clamp(rel.charB.opinion + amount, -100, 100);
+        }
+    }
+
+    public int GetOpinion(CharacterData actor, CharacterData target)
+    {
+        Relationship rel = GetRelationship(actor, target);
+        if (actor.GetInstanceID() < target.GetInstanceID())
+        {
+            return rel.charB.opinion;
+        }
+        else
+        {
+            return rel.charA.opinion;
+        }
+    }
+
+    public int GetTrust(CharacterData actor, CharacterData target)
+    {
+        Relationship rel = GetRelationship(actor, target);
+        if (actor.GetInstanceID() < target.GetInstanceID())
+        {
+            return rel.charB.trust;
+        }
+        else
+        {
+            return rel.charA.trust;
+        }
+    }
+
+    public int GetFear(CharacterData actor, CharacterData target)
+    {
+        Relationship rel = GetRelationship(actor, target);
+        if (actor.GetInstanceID() < target.GetInstanceID())
+        {
+            return rel.charB.fear;
+        }
+        else
+        {
+            return rel.charA.fear;
+        }
     }
 }
