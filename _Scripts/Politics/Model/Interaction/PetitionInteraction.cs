@@ -4,17 +4,14 @@ public class PetitionInteraction : CharacterInteraction
 {
     public float goldAmount;
 
+    public PetitionInteraction()
+    {
+        this.interactionName = "Petition GOld";
+    }
+
     // This is the logic the AI uses to decide Yes/No
     public override bool AI_Evaluate(CharacterData receiver)
     {
-        int loyalty = 0;
-        foreach ( Title title in sender.heldTitles)
-        {
-            if (title.liege.holder == receiver)
-            {
-                loyalty = title.liege.loyaltyToLiege;
-            }
-        }
         int opinion;
         Relationship rel = RelationshipManager.Instance.GetRelationship(sender,receiver);
         if (sender.GetEntityId() < receiver.GetEntityId())
@@ -25,7 +22,7 @@ public class PetitionInteraction : CharacterInteraction
         {
             opinion = rel.charA.opinion;
         }
-        return (opinion > 40) && (loyalty >= 50) && (goldAmount < receiver.GetGold() * 0.1);
+        return (opinion > 40) && (RelationshipManager.Instance.GetLoyalty(sender,receiver) >= 50) && (goldAmount < receiver.GetGold() * 0.1);
     }
 
     // This is what actually happens if the answer is Yes
@@ -37,7 +34,7 @@ public class PetitionInteraction : CharacterInteraction
             {
                 title.personalTreasury += goldAmount;
                 title.liege.personalTreasury -= goldAmount;
-                title.liege.loyaltyToLiege += 10;
+                RelationshipManager.Instance.ChangeLoyalty(sender,receiver,10);
             }
         }
         Relationship rel = RelationshipManager.Instance.GetRelationship(sender,receiver);

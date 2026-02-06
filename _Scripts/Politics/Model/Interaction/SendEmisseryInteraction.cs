@@ -2,6 +2,12 @@ using UnityEngine;
 
 public class SendEmissaryInteraction : CharacterInteraction
 {
+
+    public SendEmissaryInteraction()
+    {
+        this.interactionName = "Send Emissery";
+    }
+
     // This is the logic the AI uses to decide Yes/No
     public override bool AI_Evaluate(CharacterData receiver)
     {

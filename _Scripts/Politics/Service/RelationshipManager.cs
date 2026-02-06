@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -8,6 +10,7 @@ public class RelationshipManager : MonoBehaviour
 
     // The key is a string: "CharacterAID_CharacterBID"
     private Dictionary<string, Relationship> relationshipDatabase = new Dictionary<string, Relationship>();
+    private Dictionary<int, List<Relationship>> characterRelationships = new Dictionary<int, List<Relationship>>();
 
     void Awake() => Instance = this;
 
@@ -19,19 +22,96 @@ public class RelationshipManager : MonoBehaviour
             : $"{b.GetInstanceID()}_{a.GetInstanceID()}";
     }
 
-    public Relationship GetRelationship(CharacterData a, CharacterData b)
+    public Relationship CreateRelationship(CharacterData a, CharacterData b, FeudalStatus fs)
     {
         string key = GetKey(a, b);
+        Relationship relationship;
         if (!relationshipDatabase.ContainsKey(key))
         {
-            Relationship relationship = new Relationship();
+            relationship = new Relationship();
             relationship.charA.fear = 0;
             relationship.charA.opinion = 0;
             relationship.charA.trust = 0;
             relationship.charB.fear = 0;
             relationship.charB.opinion = 0;
             relationship.charB.trust = 0;
-            relationshipDatabase.Add(key, relationship);
+            if (a.GetInstanceID() < b.GetInstanceID())
+            {
+                relationship.charA.charID = a.GetInstanceID();
+                relationship.charB.charID = b.GetInstanceID();
+            }
+            else
+            {
+                relationship.charA.charID = b.GetInstanceID();
+                relationship.charB.charID = a.GetInstanceID();
+            }
+            List<Relationship> r = new List<Relationship>
+            {
+                relationship
+            };
+            AddToCharacterCache(a.GetInstanceID(), relationship);
+            AddToCharacterCache(b.GetInstanceID(), relationship);
+        }
+        else
+        {
+            relationship = relationshipDatabase[key];
+        }
+        switch (fs)
+        {
+            case FeudalStatus.None:
+                relationship.charA.status = FeudalStatus.None;
+                relationship.charB.status = FeudalStatus.None;
+                break;
+            case FeudalStatus.Vassal:
+                if (a.GetInstanceID() < b.GetInstanceID())
+                {
+                    relationship.charA.status = FeudalStatus.Vassal;
+                    relationship.charB.status = FeudalStatus.Liege;
+                }
+                else
+                {
+                    relationship.charB.status = FeudalStatus.Liege;
+                    relationship.charA.status = FeudalStatus.Vassal;
+                }
+                break;
+            case FeudalStatus.Liege:
+                if (a.GetInstanceID() < b.GetInstanceID())
+                {
+                    relationship.charB.status = FeudalStatus.Liege;
+                    relationship.charA.status = FeudalStatus.Vassal;
+                }
+                else
+                {
+                    relationship.charA.status = FeudalStatus.Vassal;
+                    relationship.charB.status = FeudalStatus.Liege;
+                }
+                break;
+        }
+        relationshipDatabase.Add(key, relationship);
+        return relationshipDatabase[key];
+    }
+
+    private void AddToCharacterCache(int charID, Relationship rel)
+    {
+        // 1. If the character isn't in the dictionary yet, give them a new list
+        if (!characterRelationships.ContainsKey(charID))
+        {
+            characterRelationships[charID] = new List<Relationship>();
+        }
+
+        // 2. Only add the relationship if it isn't already in their personal list
+        if (!characterRelationships[charID].Contains(rel))
+        {
+            characterRelationships[charID].Add(rel);
+        }
+    }
+
+    public Relationship GetRelationship(CharacterData a, CharacterData b)
+    {
+        string key = GetKey(a, b);
+        if (!relationshipDatabase.ContainsKey(key))
+        {
+            return CreateRelationship(a, b, FeudalStatus.None);
         }
         return relationshipDatabase[key];
     }
@@ -112,5 +192,41 @@ public class RelationshipManager : MonoBehaviour
         {
             return rel.charA.fear;
         }
+    }
+
+    public void ChangeLoyalty(CharacterData actor, CharacterData target, int amount)
+    {
+        Relationship rel = GetRelationship(actor, target);
+        rel.loyalty = Mathf.Clamp(rel.loyalty + amount, -100, 100);
+    }
+
+    public int GetLoyalty(CharacterData actor, CharacterData target)
+    {
+        Relationship rel = GetRelationship(actor, target);
+        return rel.loyalty;
+    }
+
+    public List<Relationship> GetAllRelationshipsFor(CharacterData character)
+    {
+        int id = character.GetInstanceID();
+        if (!characterRelationships.ContainsKey(id))
+        {
+            // THIS IS YOUR SMOKING GUN
+            Debug.LogWarning($"[Relationship Gap] {character.characterName} {character.name} {character.role} {character.GetHighestTitle()} (ID: {id}) exists in the world but has NO entry in characterRelationships dictionary.");
+            return new List<Relationship>();
+        }
+        return characterRelationships[character.GetInstanceID()];
+    }
+
+    public CharacterData GetOtherCharacterInRelationship(Relationship r, CharacterData character)
+    {
+        int myID = character.GetInstanceID();
+
+        // 1. Identify which ID in the relationship isn't mine
+        // (Assuming you added charA_ID and charB_ID to your Relationship class)
+        int otherID = (r.charA.charID == myID) ? r.charB.charID : r.charA.charID;
+
+        // 2. Ask the registry for the actual object
+        return CharacterRegistry.Instance.GetCharacter(otherID);
     }
 }

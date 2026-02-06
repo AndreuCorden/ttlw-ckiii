@@ -2,6 +2,11 @@ using UnityEngine;
 
 public class FabricateInteraction : CharacterInteraction
 {
+    public FabricateInteraction()
+    {
+        this.interactionName = "Fabricate lie.";
+    }
+
     // This is the logic the AI uses to decide Yes/No
     public override bool AI_Evaluate(CharacterData receiver)
     {
@@ -30,7 +35,7 @@ public class FabricateInteraction : CharacterInteraction
             {
                 RelationshipManager.Instance.ChangeOpinion(characterData, vassal.holder, -10);
                 RelationshipManager.Instance.ChangeTrust(characterData, vassal.holder, -5);
-                vassal.loyaltyToLiege -= 5;
+                RelationshipManager.Instance.ChangeLoyalty(characterData, vassal.holder, -5);
             }
         }
     }

@@ -65,8 +65,6 @@ public class MapGenerator : MonoBehaviour
 
         socialEngine.PopulateWorld(kingdomList, playerTitle);
 
-        socialEngine.SetRelationships(Object.FindAnyObjectByType<CharacterData>());
-
         settlementEngine.MarkAsCapital(kingdomList);
 
         Debug.Log($"SocialEngine check: Done assigning capitals. Now assigning sizes and populations.");
@@ -82,6 +80,7 @@ public class MapGenerator : MonoBehaviour
         Object.FindAnyObjectByType<MapManager>().UpdateMapVisuals();
         Object.FindAnyObjectByType<PlayerManager>().UpdateCharacterParameters();
         Object.FindAnyObjectByType<PlayerManager>().SetActiveParameterView();
+        Object.FindAnyObjectByType<CharacterRegistry>().PopulateRegistry();
     }
 
     public Title CreateTitle(string prefix, TitleRank rank, Title liege)
@@ -318,8 +317,8 @@ public class MapGenerator : MonoBehaviour
             float h, s, v;
             Color.RGBToHSV(baseColor, out h, out s, out v);
             // Slightly shift the color for the vassal
-            float sShift = Random.Range(-0.1f, 0.1f);
-            float vShift = Random.Range(-0.1f, 0.1f);
+            float sShift = Random.Range(-0.2f, 0.2f);
+            float vShift = Random.Range(-0.2f, 0.2f);
 
             Color vassalColor = Color.HSVToRGB(h, Mathf.Clamp01(s + sShift), Mathf.Clamp01(v + vShift)); vassal.colour = vassalColor;
             SetColourRecursive(vassal, vassalColor);

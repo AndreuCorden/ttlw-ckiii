@@ -2,6 +2,11 @@ using UnityEngine;
 
 public class DemandFiletyInteraction : CharacterInteraction
 {
+    public DemandFiletyInteraction()
+    {
+        this.interactionName = "Demand Fielty";
+    }
+
     // This is the logic the AI uses to decide Yes/No
     public override bool AI_Evaluate(CharacterData receiver)
     {

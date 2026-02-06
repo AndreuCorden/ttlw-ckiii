@@ -1,5 +1,6 @@
 using System.Linq;
 using TMPro;
+using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -165,9 +166,88 @@ public class DiplomacyUI : MonoBehaviour
         LiegeView.SetActive(false);
         VassalView.SetActive(false);
         KnownPersons.SetActive(false);
+    }
 
-        // Hide standard buttons, show "Send Envoy" button
-        // giftButton.gameObject.SetActive(false);
-        //envoyButton.gameObject.SetActive(true);
+    public void Antagonize()
+    {
+        AntagonizeInteraction Interaction = new AntagonizeInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+    }
+
+    public void DemandFielty()
+    {
+        DemandFiletyInteraction Interaction = new DemandFiletyInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+    }
+
+    public void Fabricate()
+    {
+        FabricateInteraction Interaction = new FabricateInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+    }
+
+    public void FosterChild()
+    {
+        FosterChildInteraction Interaction = new FosterChildInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+        // PickChild() for -> Interaction.child = child;
+    }
+
+    public void GrantTitle()
+    {
+        GrantTitleInteraction Interaction = new GrantTitleInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+        // PickTitle() for -> Interaction.title = title;
+    }
+
+    public void Marriage()
+    {
+        MarriageInteraction Interaction = new MarriageInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+        // PickSpouse() for -> Interaction.spouse = spouse;
+    }
+
+    public void OfferOath()
+    {
+        OfferOathInteraction Interaction = new OfferOathInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+        // PickTitles()
+    }
+
+    public void Petition()
+    {
+        PetitionInteraction Interaction = new PetitionInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+        // PickGold()
+    }
+
+    public void Revoke()
+    {
+        RevokeInteraction Interaction = new RevokeInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+    }
+
+    public void SendEmissary()
+    {
+        SendEmissaryInteraction Interaction = new SendEmissaryInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+    }
+
+    public void Sway()
+    {
+        SwayInteraction Interaction = new SwayInteraction();
+        Interaction.sender = PlayerManager.Instance.playerCharacter;
+        targetCharacter.pendingInteractions.Add(Interaction);
+        // PickTopic();
     }
 }

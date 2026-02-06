@@ -4,6 +4,11 @@ public class SwayInteraction : CharacterInteraction
 {
     public SwayTopic chosenTopic;
 
+    public SwayInteraction()
+    {
+        this.interactionName = "Sway";
+    }
+
     // This is the logic the AI uses to decide Yes/No
     public override bool AI_Evaluate(CharacterData receiver)
     {

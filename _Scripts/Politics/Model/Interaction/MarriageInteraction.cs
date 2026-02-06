@@ -5,6 +5,11 @@ public class MarriageInteraction : CharacterInteraction
 {
     public CharacterData proposedSpouse;
 
+    public MarriageInteraction()
+    {
+        this.interactionName = "Marriage";
+    }
+
     public override bool AI_Evaluate(CharacterData receiver)
     {
         // AI Logic: Check if they like the sender and if the family prestige is high

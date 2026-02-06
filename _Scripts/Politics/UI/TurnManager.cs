@@ -20,8 +20,40 @@ public class TurnManager : MonoBehaviour
 
         ProcessPopulation();
 
+        foreach (CharacterData character in CharacterRegistry.Instance.GetAllCharacters().Values)
+        {
+            if (character != PlayerManager.Instance.playerCharacter)
+            {
+                Actions.Instance.DecideNextAction(character);
+            }
+        }
+
+        foreach (CharacterData character in CharacterRegistry.Instance.GetAllCharacters().Values)
+        {
+            if (character != PlayerManager.Instance.playerCharacter)
+            {
+                Actions.Instance.ExecuteInteractions(character);
+            }
+        }
+
         // 3. Update UI
         // Trigger any UI refreshes here so the player sees the new numbers
+
+        CharacterInteractionUI ui = Object.FindAnyObjectByType<CharacterInteractionUI>(FindObjectsInactive.Include);
+
+        if (ui != null)
+        {
+            // 2. Feed the data
+            ui.playerCharacter = PlayerManager.Instance.playerCharacter;
+
+            // 3. FORCE the GameObject to be active (This triggers OnEnable)
+            ui.gameObject.SetActive(true);
+
+            // 4. Double check the list is refreshed
+            ui.RefreshList();
+
+            Debug.Log($"UI opened with {ui.playerCharacter.pendingInteractions.Count} interactions.");
+        }
 
         Debug.Log("--- Turn Complete ---");
     }
@@ -66,7 +98,7 @@ public class TurnManager : MonoBehaviour
         }
         foreach (Territory land in allLand)
         {
-            land.population += (int) (land.population*0.05);
+            land.population += (int)(land.population * 0.05);
             land.county.totalPopulation += land.population;
             land.duchy.totalPopulation += land.population;
             land.kingdom.totalPopulation += land.population;

@@ -367,11 +367,11 @@ public class CharacterGenerator : MonoBehaviour
         // Generate 1-2 Generals
         for (int i = 0; i < 2; i++)
         {
-            CharacterData gen = CreateOfficial(king, CharacterRole.Knight);
+            CreateOfficial(king, CharacterRole.Knight);
         }
 
         // Generate a Priest/Advisor
-        CharacterData bishop = CreateOfficial(king, CharacterRole.Priest);
+        CreateOfficial(king, CharacterRole.Priest);
     }
 
     public void CreateRelative(CharacterData character, string relationType)
@@ -408,6 +408,7 @@ public class CharacterGenerator : MonoBehaviour
             default:
                 break;
         }
+        RelationshipManager.Instance.CreateRelationship(character,relative,FeudalStatus.None);
     }
 
     public CharacterData CreateOfficial(CharacterData ruler, CharacterRole role)
@@ -416,6 +417,7 @@ public class CharacterGenerator : MonoBehaviour
         official.characterName = namePool[Random.Range(0, namePool.Length)] + ": " + role.ToString() + " of " + ruler.characterName.Split(" of ")[1];
         official.role = role;
         ruler.retinue.Add(official); // The official reports directly to the ruler
+        RelationshipManager.Instance.CreateRelationship(ruler,official,FeudalStatus.None);
         return official;
     }
 

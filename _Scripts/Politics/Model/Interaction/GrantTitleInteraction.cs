@@ -4,6 +4,12 @@ public class GrantTitleInteraction : CharacterInteraction
 {
     // Assuming that offeredTitle is already set up with the liege.
     public Title offeredTitle;
+
+    public GrantTitleInteraction()
+    {
+        this.interactionName = "Grant Title";
+    }
+
     // This is the logic the AI uses to decide Yes/No
     public override bool AI_Evaluate(CharacterData receiver)
     {
@@ -49,16 +55,7 @@ public class GrantTitleInteraction : CharacterInteraction
     public override void Decline(CharacterData receiver)
     {
         Relationship rel = RelationshipManager.Instance.GetRelationship(sender, receiver);
-        foreach (Title title in sender.heldTitles)
-        {
-            foreach (Title vassal in title.vassals)
-            {
-                if (vassal.holder == receiver)
-                {
-                    vassal.loyaltyToLiege += 20;
-                }
-            }
-        }
+        rel.loyalty += 20;
         if (sender.GetEntityId() < receiver.GetEntityId())
         {
             rel.charB.opinion += 10;

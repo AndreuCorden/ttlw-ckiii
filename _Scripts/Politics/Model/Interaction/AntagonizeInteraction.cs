@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class AntagonizeInteraction : CharacterInteraction
 {
+    public AntagonizeInteraction()
+    {
+        this.interactionName = "Antagonize";
+    }
     // This is the logic the AI uses to decide Yes/No
     public override bool AI_Evaluate(CharacterData receiver)
     {

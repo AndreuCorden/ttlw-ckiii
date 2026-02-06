@@ -6,6 +6,11 @@ public class OfferOathInteraction : CharacterInteraction
     //The main issue here is deciding what kind of oath I'm giving. Looking for new territory, looking to give all of my previous territory (act of war probably).
     List<Title> offeredTitlesToVassilize;
 
+    public OfferOathInteraction()
+    {
+        this.interactionName = "OfferOath";
+    }
+
     // This is the logic the AI uses to decide Yes/No
     public override bool AI_Evaluate(CharacterData receiver)
     {

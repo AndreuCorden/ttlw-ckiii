@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using NUnit.Framework.Interfaces;
 using System.Linq;
+using Unity.VisualScripting;
 
 
 [CreateAssetMenu(fileName = "NewCharacter", menuName = "Social/Character")]
@@ -220,6 +221,66 @@ public class CharacterData : ScriptableObject
             }
         }
         return closest;
+    }
+
+    public bool KnowsCharacter(CharacterData character)
+    {
+        bool knows = false;
+        if (knownCharacters.Contains(character)) knows = true;
+        else if (children.Contains(character)) knows = true;
+        else if (siblings.Contains(character)) knows = true;
+        else if (retinue.Contains(character)) knows = true;
+        else if (fostered.Contains(character)) knows = true;
+        else if (father == character || mother == character || spouse == character) knows = true;
+        else
+        {
+            if (this.family != null)
+            {
+                foreach (CharacterData ch in this.family.members)
+                {
+                    if (ch == character)
+                    {
+                        knows = true;
+                    }
+                }
+            }
+            if (!knows)
+            {
+                foreach (Title title in heldTitles)
+                {
+                    if (title.liege == character)
+                    {
+                        knows = true;
+                    }
+                    if (!knows)
+                    {
+                        foreach (Title t in title.vassals)
+                        {
+                            if (t.holder == character)
+                            {
+                                knows = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return knows;
+    }
+
+    public void ExecuteInteractions()
+    {
+        foreach (CharacterInteraction interaction in pendingInteractions)
+        {
+            if (interaction.AI_Evaluate(this))
+            {
+                interaction.Execute(this);
+            }
+            else
+            {
+                interaction.Decline(this);
+            }
+        }
     }
 
     public List<ArmyUnitData> army = new List<ArmyUnitData>();

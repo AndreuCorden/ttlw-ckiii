@@ -55,52 +55,13 @@ public class SocialEngine : MonoBehaviour
         // Create the Ruler for this level (Duke, Count, or Mayor)
         territory.holder = ruler;
         ruler.role = CharacterRole.Ruler;
+        RelationshipManager.Instance.CreateRelationship(liege,ruler,FeudalStatus.Liege);
 
         // Keep going down the hierarchy
         foreach (Title sub in territory.vassals)
         {
             // Further down, the chance of being a relative of the KING decreases
             ProcessTerritory(sub, ruler, 0.2f);
-        }
-    }
-
-    public void InitializeWorldSocialWeb()
-    {
-        CharacterData[] allCharactersInWorld = Resources.LoadAll<CharacterData>("Characters");
-        foreach (CharacterData character in allCharactersInWorld)
-        {
-            SetRelationships(character);
-        }
-    }
-
-    public void SetRelationships(CharacterData character)
-    {
-        if (character == null) return;
-
-        // 1. Link to Family (Blood Connections)
-        if (character.father != null) 
-            RelationshipManager.Instance.GetRelationship(character, character.father);
-        
-        if (character.mother != null) 
-            RelationshipManager.Instance.GetRelationship(character, character.mother);
-
-        foreach (CharacterData child in character.children)
-            RelationshipManager.Instance.GetRelationship(character, child);
-
-        // 2. Link to Feudal Ties (Liege/Vassals)
-        foreach (Title title in character.heldTitles)
-        {
-            if (title.liege != null && title.liege.holder != null)
-            {
-                // Establishing the "Legal" connection
-                Relationship rel = RelationshipManager.Instance.GetRelationship(character, title.liege.holder);
-            }
-        }
-        
-        // 3. Link to Retinue (The Inner Circle)
-        foreach (CharacterData member in character.retinue)
-        {
-            RelationshipManager.Instance.GetRelationship(character, member);
         }
     }
 }

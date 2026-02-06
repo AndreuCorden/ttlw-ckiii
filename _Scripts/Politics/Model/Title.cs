@@ -17,7 +17,6 @@ public class Title : MonoBehaviour
     // The people who report to this Title
     public List<Title> vassals = new List<Title>();
     public Title liege;
-    public int loyaltyToLiege = 50;
 
     public float personalTreasury = 0;
     public int personalPopulation = 0;

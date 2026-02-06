@@ -225,6 +225,7 @@ RectTransform:
   - {fileID: 1592860293}
   - {fileID: 1520319677}
   - {fileID: 502346951}
+  - {fileID: 1475051328}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3154,7 +3155,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 76820598}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: OfferOath
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &76820598
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6289,7 +6302,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 452856859}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: Revoke
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &452856859
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6410,7 +6435,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 458407034}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: Petition
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &458407034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6876,6 +6913,7 @@ GameObject:
   - component: {fileID: 543988337}
   - component: {fileID: 543988336}
   - component: {fileID: 543988338}
+  - component: {fileID: 543988339}
   m_Layer: 0
   m_Name: GlobalGameManager
   m_TagString: Untagged
@@ -6926,6 +6964,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 894c25723231d7e42806603e0a02eced, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RelationshipManager
+--- !u!114 &543988339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543988335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac0d3aeb87759724dad4bc52d1eb468d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterRegistry
 --- !u!1 &546070204
 GameObject:
   m_ObjectHideFlags: 0
@@ -8549,7 +8599,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 689554165}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: Antagonize
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &689554165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8670,7 +8732,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 710146745}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: Fabricate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &710146745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9096,7 +9170,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 729711286}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: Marriage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &729711286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9959,14 +10045,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
   playerCharacter: {fileID: 0}
-  playerFamily:
-    familyName: 
-    familyColor: {r: 0, g: 0, b: 0, a: 0}
-    members: []
-    alliedFamilies: []
-    headOfFamily: {fileID: 0}
-    reputation: 0
-    influence: 0
+  playerFamily: {fileID: 0}
   Name: {fileID: 1134705149}
   Role: {fileID: 136934729}
   Gold: {fileID: 485106972}
@@ -13234,7 +13313,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1467014670}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: GrantTitle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1467014670
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13456,6 +13547,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1473050457}
   m_CullTransparentMesh: 1
+--- !u!1 &1475051327
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1475051328}
+  - component: {fileID: 1475051329}
+  m_Layer: 5
+  m_Name: VerticalInteractions
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1475051328
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475051327}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7615115}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 800}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1475051329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475051327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 1
+  m_Spacing: 10
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &1483937978
 GameObject:
   m_ObjectHideFlags: 0
@@ -13741,6 +13894,7 @@ GameObject:
   - component: {fileID: 1520319677}
   - component: {fileID: 1520319679}
   - component: {fileID: 1520319678}
+  - component: {fileID: 1520319680}
   m_Layer: 5
   m_Name: BuildPanel
   m_TagString: Untagged
@@ -13807,6 +13961,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1520319676}
   m_CullTransparentMesh: 1
+--- !u!114 &1520319680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520319676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &1521466487
 GameObject:
   m_ObjectHideFlags: 0
@@ -14087,7 +14267,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1531572725}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: DemandFielty
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1531572725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14208,7 +14400,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1540892209}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: FosterChild
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1540892209
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14832,7 +15036,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1606993590}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: Sway
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1606993590
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15142,7 +15358,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1632198574}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 213900241}
+        m_TargetAssemblyTypeName: DiplomacyUI, Assembly-CSharp
+        m_MethodName: SendEmissary
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1632198574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15588,7 +15816,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
-  m_Content: {fileID: 710247539}
+  m_Content: {fileID: 2013323067}
   m_Horizontal: 1
   m_Vertical: 1
   m_MovementType: 1
@@ -17704,7 +17932,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: 10
+  m_Spacing: 0
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
@@ -17989,8 +18217,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
-  m_HorizontalFit: 0
-  m_VerticalFit: 0
+  m_HorizontalFit: 2
+  m_VerticalFit: 2
 --- !u!114 &2053316085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18028,6 +18256,7 @@ GameObject:
   - component: {fileID: 2078949036}
   - component: {fileID: 2078949035}
   - component: {fileID: 2078949034}
+  - component: {fileID: 2078949037}
   m_Layer: 0
   m_Name: TurnController
   m_TagString: Untagged
@@ -18074,6 +18303,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2078949037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2078949033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fedd1d101ad71d54396d8070c673fac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterInteractionUI
+  playerCharacter: {fileID: 0}
+  cardPrefab: {fileID: 7625826666528738587, guid: 572a1bf33db36704ea82f432c8e01413, type: 3}
+  listParent: {fileID: 1475051328}
 --- !u!1 &2133584649
 GameObject:
   m_ObjectHideFlags: 0

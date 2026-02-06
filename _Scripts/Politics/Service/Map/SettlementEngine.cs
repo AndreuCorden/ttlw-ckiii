@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 
 public class SettlementEngine : MonoBehaviour
 {
@@ -10,7 +9,10 @@ public class SettlementEngine : MonoBehaviour
     {
         foreach (Title kingdom in kingdoms)
         {
-            kingdom.seatOfPower.isCapital = true;
+            if (kingdom.rank != TitleRank.Baron)
+            {
+                kingdom.seatOfPower.isCapital = true;
+            }
             MarkAsCapital(kingdom.vassals);
         }
     }
@@ -116,49 +118,32 @@ public class SettlementEngine : MonoBehaviour
         // Always add the Town Hall of appropriate level
         TownHallData townHall = buildingLibrary.townHallLevels[Mathf.Clamp((int)t.size, 0, buildingLibrary.townHallLevels.Count - 1)];
         t.currentBuildings.Add(townHall);
-        t.buildableBuildings = GetAllBuildable(townHall);
 
         // Add additional buildings based on size
         int additionalBuildings = System.Math.Min((int)t.size, buildingLibrary.allPossibleBuildings.Count); // More buildings for larger settlements
-        int numRep = 0;
-        while (t.currentBuildings.Count < (additionalBuildings + 1) && numRep < 20)
+        SetBuildingsInTerritory(t, townHall);
+        while (t.currentBuildings.Count < (additionalBuildings + 1) && t.buildableBuildings.Count > 0)
         {
-            int randomIndex = Random.Range(0, buildingLibrary.allPossibleBuildings.Count);
-            BuildingData buildingToAdd = buildingLibrary.allPossibleBuildings[randomIndex];
-            while (buildingToAdd.level < additionalBuildings)
-            {
-                if (buildingToAdd.nextUpgrade != null)
-                {
-                    buildingToAdd = buildingToAdd.nextUpgrade;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            if (!t.currentBuildings.Contains(buildingToAdd))
-            {
-                t.currentBuildings.Add(buildingToAdd);
-            }
-            numRep++;
+            int randomIndex = Random.Range(0, t.buildableBuildings.Count);
+            BuildingData buildingToAdd = t.buildableBuildings[randomIndex];
+            t.buildableBuildings.Remove(buildingToAdd);
+            t.currentBuildings.Add(buildingToAdd);
         }
     }
 
-    public List<BuildingData> GetAllBuildable(TownHallData townHallData)
+    void SetBuildingsInTerritory(Territory t, TownHallData th)
     {
-        List<BuildingData> buildingDatas = new List<BuildingData>();
-        foreach (BuildingData buildingData in townHallData.unlockedBuildings)
+        foreach (BuildingData building in th.unlockedBuildings)
         {
-            if (buildingDatas.FirstOrDefault(b => b.buildingName == buildingData.buildingName) == null)
+            if (!t.buildableBuildings.Find(b => b.buildingName == building.buildingName) && Random.value > 0.5)
             {
-                buildingDatas.Add(buildingData);
+                t.buildableBuildings.Add(building);
             }
         }
-        if (townHallData.prev != null)
+        if (th.prev != null)
         {
-            buildingDatas.AddRange(GetAllBuildable(townHallData.prev));
+            SetBuildingsInTerritory(t, th.prev);
         }
-        return buildingDatas;
     }
 
     public void RunInitialEconomySimulation()
