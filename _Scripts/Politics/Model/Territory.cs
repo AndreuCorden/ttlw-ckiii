@@ -18,6 +18,7 @@ public class Territory : MonoBehaviour
 
     [Header("Visuals")]
     public GameObject capitalIcon;
+    public GameObject isDisplayed;
 
     [Header("Infrastructure")]
     public List<BuildingData> currentBuildings = new List<BuildingData>();
@@ -104,6 +105,17 @@ public class Territory : MonoBehaviour
         currentBuildings.Add(buildingData);
     }
 
+    public void IsDisplayed(bool isBeingDisplayed)
+    {
+        if(isBeingDisplayed)
+        {
+            isDisplayed.SetActive(true);
+        }
+        else
+        {
+            isDisplayed.SetActive(false);
+        }
+    }
     // Inside Territory.cs
     // public bool MeetsRequirements(BuildingData b)
     // {

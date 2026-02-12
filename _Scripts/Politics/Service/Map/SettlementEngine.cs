@@ -148,49 +148,14 @@ public class SettlementEngine : MonoBehaviour
 
     public void RunInitialEconomySimulation()
     {
-        Territory[] territories = Object.FindObjectsByType<Territory>(FindObjectsSortMode.None);
-
-        foreach (Territory t in territories)
-        {
-            // B. Calculate Gold based on THIS new population
-            float goldGenerated = t.GetGoldPerTurn();
-            goldGenerated += t.population / 100f;
-
-            // C. Store it
-            t.localWealth = (int)goldGenerated;
-
-            // Note: We don't add to treasury here yet because the game hasn't "started"
-        }
-
-        // D. Update the hierarchy so Counties/Kingdoms show the sum of these new numbers
-        RefreshHierarchyStats();
-    }
-
-    private void RefreshHierarchyStats()
-    {
-        Title[] counties = Object.FindObjectsByType<Title>(FindObjectsSortMode.None)
-            .Where(t => t.rank == TitleRank.Count).ToArray();
-        Title[] provinces = Object.FindObjectsByType<Title>(FindObjectsSortMode.None)
-            .Where(t => t.rank == TitleRank.Duke).ToArray();
         Title[] kingdoms = Object.FindObjectsByType<Title>(FindObjectsSortMode.None)
             .Where(t => t.rank == TitleRank.King).ToArray();
-
-        foreach (var t in counties)
+        foreach (Title t in kingdoms)
         {
-            // Update localWealth for the UI/Summary
-            t.personalTreasury = t.directDomain.Sum(sub => sub.localWealth);
-        }
-        foreach (var t in provinces)
-        {
-            // Update localWealth for the UI/Summary
-            t.personalTreasury = t.vassals.Sum(sub => sub.personalTreasury);
-        }
-        foreach (var t in kingdoms)
-        {
-            // Update localWealth for the UI/Summary
-            t.personalTreasury = t.vassals.Sum(sub => sub.personalTreasury);
+            t.CalculateTreasury();
         }
     }
+
 
     public void RunInitialPopulationAddition(List<Title> kingdoms, List<Territory> allLand)
     {

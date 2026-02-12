@@ -86,7 +86,7 @@ public class PlayerManager : MonoBehaviour
     {
         Name.text = playerCharacter.characterName;
         Role.text = playerCharacter.GetHighestRank().ToString();
-        Gold.text = playerCharacter.GetGold().ToString();
+        Gold.text = playerCharacter.treasury.ToString();
         Prowess.text = playerCharacter.prowess.ToString();
         Influence.text = playerCharacter.influence.ToString();
     }

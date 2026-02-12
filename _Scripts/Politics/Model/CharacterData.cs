@@ -16,6 +16,8 @@ public class CharacterData : ScriptableObject
     public int age;
     public int influence;
 
+    public float treasury;
+
     [Header("Dynamics")]
     public List<Trait> traits = new List<Trait>();
     public Trait religion;
@@ -137,16 +139,6 @@ public class CharacterData : ScriptableObject
             }
         }
         return isLiegeOf;
-    }
-
-    public float GetGold()
-    {
-        float totalGold = 0;
-        foreach (Title title in heldTitles)
-        {
-            totalGold += title.personalTreasury;
-        }
-        return totalGold;
     }
 
     public TitleRank GetHighestRank()

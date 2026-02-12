@@ -22,7 +22,7 @@ public class PetitionInteraction : CharacterInteraction
         {
             opinion = rel.charA.opinion;
         }
-        return (opinion > 40) && (RelationshipManager.Instance.GetLoyalty(sender,receiver) >= 50) && (goldAmount < receiver.GetGold() * 0.1);
+        return (opinion > 40) && (RelationshipManager.Instance.GetLoyalty(sender,receiver) >= 50) && (goldAmount < receiver.treasury * 0.1);
     }
 
     // This is what actually happens if the answer is Yes
@@ -32,8 +32,8 @@ public class PetitionInteraction : CharacterInteraction
         {
             if (title.liege.holder == receiver)
             {
-                title.personalTreasury += goldAmount;
-                title.liege.personalTreasury -= goldAmount;
+                title.holder.treasury += goldAmount;
+                title.liege.holder.treasury -= goldAmount;
                 RelationshipManager.Instance.ChangeLoyalty(sender,receiver,10);
             }
         }

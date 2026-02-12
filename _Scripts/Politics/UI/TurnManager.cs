@@ -12,13 +12,14 @@ public class TurnManager : MonoBehaviour
     {
         Debug.Log("--- Starting End of Turn Processing ---");
 
-        // 1. Process Economy & Population (Gold and Growth)
-        GlobalEconomyManager.Instance.ProcessEconomy();
-
         // 2. Age the Characters
         AgeAllCharacters();
 
+        // Change Populations
         ProcessPopulation();
+
+        // Calculate Kings wealth
+        ProcessWealth();
 
         foreach (CharacterData character in CharacterRegistry.Instance.GetAllCharacters().Values)
         {
@@ -138,6 +139,18 @@ public class TurnManager : MonoBehaviour
         foreach (Title vassal in lord.vassals)
         {
             RestartPopulationStats(vassal);
+        }
+    }
+
+    public void ProcessWealth()
+    {
+        List<Title> kingdoms = Object.FindObjectsByType<Title>(FindObjectsSortMode.None)
+            .Where(t => t.rank == TitleRank.King)
+            .ToList();
+
+        foreach(Title kingdom in kingdoms)
+        {
+            kingdom.CalculateTreasury();
         }
     }
 }

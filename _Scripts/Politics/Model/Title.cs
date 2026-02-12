@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Buffers;
 
 public class Title : MonoBehaviour
 {
@@ -17,27 +18,27 @@ public class Title : MonoBehaviour
     // The people who report to this Title
     public List<Title> vassals = new List<Title>();
     public Title liege;
-
-    public float personalTreasury = 0;
     public int personalPopulation = 0;
     public int totalPopulation = 0;
 
-    public float GetTotalTaxIncome()
+    public void CalculateTreasury()
     {
-        float income = 0;
-        // 1. Get 100% of income from direct land
-        foreach (var land in directDomain) income += land.GetGoldPerTurn();
-
-        // 2. Get a % from vassals
-        foreach (var vassal in vassals) income += vassal.CalculateTaxForLiege();
-
-        return income;
+        float treasury = seatOfPower.GetGoldPerTurn();
+        foreach(Territory territory in directDomain)
+        {
+            treasury += territory.GetGoldPerTurn();
+        }
+        foreach (var vassal in vassals) treasury += vassal.CalculateTaxForLiege();
+        holder.treasury = treasury;
     }
 
     public float CalculateTaxForLiege()
     {
         // Whatever logic you want: e.g., 20% of their total income
-        return (GetTotalTaxIncome() * 0.2f);
+        CalculateTreasury();
+        float tax = holder.treasury * 0.2f;
+        holder.treasury -= tax;
+        return tax;
     }
 
     public int GetPopulation()

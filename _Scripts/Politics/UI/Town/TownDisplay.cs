@@ -96,9 +96,9 @@ public class TownDisplay : MonoBehaviour
         {
             BuildingData nextTH = buildingLibrary.townHallLevels[nextLevelIndex];
 
-            if (t.owner.personalTreasury >= nextTH.cost)
+            if (t.owner.holder.treasury >= nextTH.cost)
             {
-                t.owner.personalTreasury -= nextTH.cost;
+                t.owner.holder.treasury -= nextTH.cost;
                 t.AddBuilding(nextTH); // Your AddBuilding logic handles replacing the old one
 
                 RefreshCurrentBuildings();
@@ -123,9 +123,9 @@ public class TownDisplay : MonoBehaviour
         }
 
         // Assuming Title.holder has the treasury
-        if (t.owner.personalTreasury >= building.cost)
+        if (t.owner.holder.treasury >= building.cost)
         {
-            t.owner.personalTreasury -= building.cost;
+            t.owner.holder.treasury -= building.cost;
             t.AddBuilding(building);
 
             // Refresh both UIs

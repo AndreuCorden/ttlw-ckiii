@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class MapInteraction : MonoBehaviour
 {
     public CharacterDisplay characterDisplay; // Drag your CharacterDisplay here
+    public List<Territory> territoriesOwnedByDisplayedCharacter = new List<Territory>();
 
     public TownDisplay townUI; // Drag your TownDisplay here
 
@@ -19,6 +21,7 @@ public class MapInteraction : MonoBehaviour
         {
             HandleMapClick(false);
         }
+        DisplayTerritories();
     }
 
     private void HandleMapClick(bool isLeftClick)
@@ -71,6 +74,23 @@ public class MapInteraction : MonoBehaviour
             {
                 characterDisplay.CloseDisplay();
                 townUI.OpenTownDisplay(t);
+            }
+        }
+    }
+
+    private void DisplayTerritories()
+    {
+        foreach(Territory t in territoriesOwnedByDisplayedCharacter)
+        {
+            t.IsDisplayed(false);
+        }
+        territoriesOwnedByDisplayedCharacter.Clear();
+        foreach(Title t in characterDisplay.characterToDisplay.heldTitles)
+        {
+            foreach(Territory territory in t.directDomain)
+            {
+                territory.IsDisplayed(true);
+                territoriesOwnedByDisplayedCharacter.Add(territory);
             }
         }
     }
