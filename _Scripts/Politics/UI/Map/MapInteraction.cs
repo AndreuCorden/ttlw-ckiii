@@ -16,12 +16,12 @@ public class MapInteraction : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) // Left Click - Character
         {
             HandleMapClick(true);
+            DisplayTerritories();
         }
         else if (Input.GetMouseButtonDown(1)) // Right Click - Town
         {
             HandleMapClick(false);
         }
-        DisplayTerritories();
     }
 
     private void HandleMapClick(bool isLeftClick)
