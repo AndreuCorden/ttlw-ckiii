@@ -7,6 +7,7 @@ public class InteractionCardUI : MonoBehaviour
     public TextMeshProUGUI descriptionText;
     public Button acceptButton;
     public Button declineButton;
+    public Button closeButton;
 
     private CharacterInteraction currentInteraction;
     private CharacterData player;
@@ -22,18 +23,35 @@ public class InteractionCardUI : MonoBehaviour
 
         acceptButton.onClick.AddListener(OnAccept);
         declineButton.onClick.AddListener(OnDecline);
+        closeButton.gameObject.SetActive(false);
     }
 
     void OnAccept()
     {
         currentInteraction.Execute(player);
-        Close();
+        ShowResult(true);
     }
 
     void OnDecline()
     {
         currentInteraction.Decline(player);
-        Close();
+        ShowResult(false);
+    }
+
+    void ShowResult(bool accepted)
+    {
+        closeButton.gameObject.SetActive(true);
+        acceptButton.gameObject.SetActive(false);
+        declineButton.gameObject.SetActive(false);
+        closeButton.onClick.AddListener(Close);
+        if (accepted)
+        {
+            descriptionText.text = "Test: Interaction accepted!";
+        }
+        else
+        {
+            descriptionText.text = "Test: Interaction declined!";
+        }
     }
 
     void Close()

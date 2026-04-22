@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class CharacterCreatorUI : MonoBehaviour
 {
@@ -37,20 +38,24 @@ public class CharacterCreatorUI : MonoBehaviour
         isSelectingTerritory = true;
     }
 
-    [System.Obsolete]
     void Update()
     {
+        // Fix: Add the UI shield here too!
         if (isSelectingTerritory && Input.GetMouseButtonDown(0))
         {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                return; // Ignore the click if we hit a UI button
+            }
             DetectTerritoryClick();
         }
     }
 
-    [System.Obsolete]
     private void DetectTerritoryClick()
     {
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(mouseWorldPos, Vector2.zero);
+        // Cleaner way to raycast in 2D without using obsolete math
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
 
         if (hit.collider != null)
         {
@@ -58,16 +63,24 @@ public class CharacterCreatorUI : MonoBehaviour
 
             if (clickedTerritory != null && clickedTerritory.territoryType == TerritoryType.Land)
             {
-                TitleRank currentMapMode = Object.FindAnyObjectByType<MapManager>().currentMapMode;
-                // 1. Assign Player
-                Title playerSelectedTitle = PlayerManager.Instance.AssignPlayerToTerritory(clickedTerritory,currentMapMode);
+                // Use the non-obsolete version for Unity 2023+
+                MapManager mapManager = Object.FindFirstObjectByType<MapManager>();
+                TitleRank currentMapMode = mapManager.currentMapMode;
 
-                // 2. Resume the rest of the world generation
-                Object.FindAnyObjectByType<MapGenerator>().FinalizeWorldGeneration(playerSelectedTitle);
+                Title playerSelectedTitle = PlayerManager.Instance.AssignPlayerToTerritory(clickedTerritory, currentMapMode);
 
-                // 3. Close UI
-                selectionText.SetActive(false);
-                isSelectingTerritory = false;
+                // Safety Check: Ensure the player title actually exists before finalizing
+                if (playerSelectedTitle != null)
+                {
+                    Object.FindFirstObjectByType<MapGenerator>().FinalizeWorldGeneration(playerSelectedTitle);
+
+                    selectionText.SetActive(false);
+                    isSelectingTerritory = false;
+                }
+                else
+                {
+                    Debug.LogError("Player title assignment failed! Check AssignPlayerToTerritory logic.");
+                }
             }
         }
     }

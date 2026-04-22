@@ -7,6 +7,7 @@ public abstract class CharacterInteraction
 {
     public CharacterData sender;
     public string interactionName;
+    public string lastResultMessage;
     public InteractionType type;
 
     // This is the logic the AI uses to decide Yes/No

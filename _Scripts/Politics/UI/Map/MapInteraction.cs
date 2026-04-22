@@ -16,7 +16,6 @@ public class MapInteraction : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) // Left Click - Character
         {
             HandleMapClick(true);
-            DisplayTerritories();
         }
         else if (Input.GetMouseButtonDown(1)) // Right Click - Town
         {
@@ -64,6 +63,7 @@ public class MapInteraction : MonoBehaviour
                 {
                     townUI.CloseDisplay();
                     characterDisplay.OpenCharacterDisplay(targetTitle.holder);
+                    DisplayTerritories();
                 }
                 else
                 {

@@ -133,7 +133,8 @@ public class CharacterData : ScriptableObject
         bool isLiegeOf = false;
         foreach (Title title in heldTitles)
         {
-            if (title.liege.holder != null && target == title.liege.holder)
+            // Checking if liege is not null instead of liege.holder because I'm assuming that all titles have a holder and I want to know if they're my liege.
+            if (title.liege != null && target == title.liege.holder)
             {
                 isLiegeOf = true;
             }

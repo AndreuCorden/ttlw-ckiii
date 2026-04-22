@@ -15,8 +15,6 @@ public class MapGenerator : MonoBehaviour
     public SocialEngine socialEngine;
     public SettlementEngine settlementEngine;
     public GameObject mapInteraction;
-
-    [System.Obsolete]
     void Start()
     {
         GenerateTerrain();
@@ -47,13 +45,11 @@ public class MapGenerator : MonoBehaviour
 
         Object.FindAnyObjectByType<CharacterCreatorUI>().ShowCreator();
     }
-
-    [System.Obsolete]
     public void FinalizeWorldGeneration(Title playerTitle)
     {
         mapInteraction.SetActive(true);
         List<Title> kingdomList = new List<Title>();
-        foreach (var t in Object.FindObjectsOfType<Title>())
+        foreach (var t in Object.FindObjectsByType<Title>(FindObjectsSortMode.None))
         {
             if (t.rank == TitleRank.King)
             {
@@ -131,15 +127,15 @@ public class MapGenerator : MonoBehaviour
                     }
 
                     // 2. COUNTY SEIZURE (Takes 2 Baronies)
-                    SeizeTiles(cTitle, 2);
+                    SeizeTiles(cTitle, Mathf.Max(2,cbundle.Value.Count/5));
                 }
 
                 // 3. PROVINCE SEIZURE (Takes 2 tiles, prefers Baronies over Counties)
-                SeizeTiles(pTitle, 2);
+                SeizeTiles(pTitle, Mathf.Max(2,pbundle.Value.Count/10));
             }
 
             // 4. KINGDOM SEIZURE (Takes 2 tiles, prefers Baronies -> Counties -> Dukes)
-            SeizeTiles(kTitle, 2);
+            SeizeTiles(kTitle, Mathf.Max(2,kbundle.Value.Count/17));
         }
         ApplyTopDownColours(kingdoms);
     }
@@ -152,9 +148,9 @@ public class MapGenerator : MonoBehaviour
         // 1. Find targets (Preferring tiles that aren't currently Seats of Power)
         List<Territory> targets = taker.FullRealmTiles
             .Where(t => t.owner != taker && t.owner != null)
-            .OrderBy(t => t == t.owner.seatOfPower ? 1 : 0) // Prefer non-seats (0 comes before 1)
-            .ThenBy(t => (int)t.owner.rank)                 // Prefer lower ranks
-            .ThenBy(t => Random.value)                      // Randomize within those tiers
+            .OrderBy(t => (int)t.owner.rank)               // Prefer lower ranks
+            .ThenBy(t => t == t.owner.seatOfPower ? 1 : 0) // Prefer non-seats (0 comes before 1)
+            .ThenBy(t => Random.value)                     // Randomize within those tiers
             .Take(amount)
             .ToList();
 

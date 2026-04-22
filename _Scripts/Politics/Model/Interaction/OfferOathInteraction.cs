@@ -4,7 +4,7 @@ using UnityEngine;
 public class OfferOathInteraction : CharacterInteraction
 {
     //The main issue here is deciding what kind of oath I'm giving. Looking for new territory, looking to give all of my previous territory (act of war probably).
-    List<Title> offeredTitlesToVassilize;
+    List<Title> offeredTitlesToVassilize = new List<Title>();
 
     public OfferOathInteraction()
     {
