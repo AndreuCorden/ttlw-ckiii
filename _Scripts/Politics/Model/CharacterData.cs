@@ -9,6 +9,7 @@ using Unity.VisualScripting;
 public class CharacterData : ScriptableObject
 {
     public string characterName;
+    public string characterId;
     public Sprite portrait;
 
     [Header("Personality Traits")]

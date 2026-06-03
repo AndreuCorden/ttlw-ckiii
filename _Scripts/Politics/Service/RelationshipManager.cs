@@ -10,16 +10,16 @@ public class RelationshipManager : MonoBehaviour
 
     // The key is a string: "CharacterAID_CharacterBID"
     private Dictionary<string, Relationship> relationshipDatabase = new Dictionary<string, Relationship>();
-    private Dictionary<int, List<Relationship>> characterRelationships = new Dictionary<int, List<Relationship>>();
+    private Dictionary<string, List<Relationship>> characterRelationships = new Dictionary<string, List<Relationship>>();
 
     void Awake() => Instance = this;
 
     private string GetKey(CharacterData a, CharacterData b)
     {
-        // Sort IDs or names alphabetically so that (A, B) and (B, A) result in the same key
-        return a.GetInstanceID() < b.GetInstanceID()
-            ? $"{a.GetInstanceID()}_{b.GetInstanceID()}"
-            : $"{b.GetInstanceID()}_{a.GetInstanceID()}";
+        // String.Compare ensures the key is always "Alpha_Beta" and never "Beta_Alpha"
+        return string.Compare(a.characterId, b.characterId) < 0
+            ? $"{a.characterId}_{b.characterId}"
+            : $"{b.characterId}_{a.characterId}";
     }
 
     public Relationship CreateRelationship(CharacterData a, CharacterData b, FeudalStatus fs)
@@ -37,20 +37,20 @@ public class RelationshipManager : MonoBehaviour
             relationship.charB.trust = 0;
             if (a.GetInstanceID() < b.GetInstanceID())
             {
-                relationship.charA.charID = a.GetInstanceID();
-                relationship.charB.charID = b.GetInstanceID();
+                relationship.charA.charID = a.characterId;
+                relationship.charB.charID = b.characterId;
             }
             else
             {
-                relationship.charA.charID = b.GetInstanceID();
-                relationship.charB.charID = a.GetInstanceID();
+                relationship.charA.charID = b.characterId;
+                relationship.charB.charID = a.characterId;
             }
             List<Relationship> r = new List<Relationship>
             {
                 relationship
             };
-            AddToCharacterCache(a.GetInstanceID(), relationship);
-            AddToCharacterCache(b.GetInstanceID(), relationship);
+            AddToCharacterCache(a.characterId, relationship);
+            AddToCharacterCache(b.characterId, relationship);
         }
         else
         {
@@ -91,7 +91,7 @@ public class RelationshipManager : MonoBehaviour
         return relationshipDatabase[key];
     }
 
-    private void AddToCharacterCache(int charID, Relationship rel)
+    private void AddToCharacterCache(string charID, Relationship rel)
     {
         // 1. If the character isn't in the dictionary yet, give them a new list
         if (!characterRelationships.ContainsKey(charID))
@@ -208,23 +208,23 @@ public class RelationshipManager : MonoBehaviour
 
     public List<Relationship> GetAllRelationshipsFor(CharacterData character)
     {
-        int id = character.GetInstanceID();
+        string id = character.characterId;
         if (!characterRelationships.ContainsKey(id))
         {
             // THIS IS YOUR SMOKING GUN
             Debug.LogWarning($"[Relationship Gap] {character.characterName} {character.name} {character.role} {character.GetHighestTitle()} (ID: {id}) exists in the world but has NO entry in characterRelationships dictionary.");
             return new List<Relationship>();
         }
-        return characterRelationships[character.GetInstanceID()];
+        return characterRelationships[character.characterId];
     }
 
     public CharacterData GetOtherCharacterInRelationship(Relationship r, CharacterData character)
     {
-        int myID = character.GetInstanceID();
+        string myID = character.characterId;
 
         // 1. Identify which ID in the relationship isn't mine
         // (Assuming you added charA_ID and charB_ID to your Relationship class)
-        int otherID = (r.charA.charID == myID) ? r.charB.charID : r.charA.charID;
+        string otherID = (r.charA.charID == myID) ? r.charB.charID : r.charA.charID;
 
         // 2. Ask the registry for the actual object
         return CharacterRegistry.Instance.GetCharacter(otherID);

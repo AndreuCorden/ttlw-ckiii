@@ -7,7 +7,7 @@ public class CharacterRegistry : MonoBehaviour
     public static CharacterRegistry Instance;
 
     // This is our "Phonebook"
-    private Dictionary<int, CharacterData> idToCharacter = new Dictionary<int, CharacterData>();
+    private Dictionary<string, CharacterData> idToCharacter = new Dictionary<string, CharacterData>();
 
     void Awake()
     {
@@ -25,13 +25,13 @@ public class CharacterRegistry : MonoBehaviour
         foreach (var c in allChars)
         {
             // We use the InstanceID as the unique key
-            int id = c.GetInstanceID();
+            string id = c.characterId;
             if (!idToCharacter.ContainsKey(id))
                 idToCharacter.Add(id, c);
         }
     }
 
-    public CharacterData GetCharacter(int id)
+    public CharacterData GetCharacter(string id)
     {
         if (idToCharacter.TryGetValue(id, out CharacterData character))
             return character;
@@ -39,7 +39,7 @@ public class CharacterRegistry : MonoBehaviour
         return null;
     }
 
-    public Dictionary<int, CharacterData> GetAllCharacters()
+    public Dictionary<string, CharacterData> GetAllCharacters()
     {
         return idToCharacter;
     }

@@ -301,6 +301,7 @@ public class CharacterGenerator : MonoBehaviour
         newChar.characterName = namePool[Random.Range(0, namePool.Length)] + " " + relation.family.familyName;
         newChar.role = role;
         newChar.family = relation.family;
+        newChar.characterId = $"{newChar.role}_{newChar.characterName}_{newChar.family.familyName}_{System.Guid.NewGuid()}";
 
         // Initial stats
         newChar.prowess = Random.Range(1, 100);
@@ -337,11 +338,10 @@ public class CharacterGenerator : MonoBehaviour
         // Safety check: if territoryName is empty
         if (string.IsNullOrEmpty(territoryName)) territoryName = "Unknown Land";
         newLeader.characterName = namePool[Random.Range(0, namePool.Length)] + territoryName;
-
-        PopulateKingdomCourt(newLeader);
         newLeader.traits = RandomTraitGenerator();
-
         newLeader.family = CreateNewFamily(newLeader);
+        newLeader.characterId = $"{newLeader.role}_{newLeader.characterName}_{newLeader.family.familyName}_{System.Guid.NewGuid()}";
+        PopulateKingdomCourt(newLeader);
 
         return newLeader;
     }
@@ -383,6 +383,10 @@ public class CharacterGenerator : MonoBehaviour
         relative.characterName = namePool[Random.Range(0, namePool.Length)] + " (" + relationType + ")";
         relative.family = character.family;
         relative.role = CharacterRole.Family;
+        Debug.Log($" {relative.family == null}");
+        Debug.Log($"{character.name == null}");
+        Debug.Log($"{relative.family.name == null}");
+        relative.characterId = $"{relative.role}_{relative.characterName}_{relative.family.familyName}_{System.Guid.NewGuid()}";
         switch (relationType)
         {
             case "Spouse":
@@ -408,7 +412,7 @@ public class CharacterGenerator : MonoBehaviour
             default:
                 break;
         }
-        RelationshipManager.Instance.CreateRelationship(character,relative,FeudalStatus.None);
+        RelationshipManager.Instance.CreateRelationship(character, relative, FeudalStatus.None);
     }
 
     public CharacterData CreateOfficial(CharacterData ruler, CharacterRole role)
@@ -416,8 +420,10 @@ public class CharacterGenerator : MonoBehaviour
         CharacterData official = ScriptableObject.CreateInstance<CharacterData>();
         official.characterName = namePool[Random.Range(0, namePool.Length)] + ": " + role.ToString() + " of " + ruler.characterName.Split(" of ")[1];
         official.role = role;
+        official.family = CreateNewFamily(official);
+        official.characterId = $"{official.role}_{official.characterName}_{official.family.familyName}_{System.Guid.NewGuid()}";
         ruler.retinue.Add(official); // The official reports directly to the ruler
-        RelationshipManager.Instance.CreateRelationship(ruler,official,FeudalStatus.None);
+        RelationshipManager.Instance.CreateRelationship(ruler, official, FeudalStatus.None);
         return official;
     }
 

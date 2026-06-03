@@ -42,8 +42,6 @@ public class MapGenerator : MonoBehaviour
         GenerateFeudalHierarchy();
 
         Object.FindAnyObjectByType<MapManager>().UpdateMapVisuals();
-
-        Object.FindAnyObjectByType<CharacterCreatorUI>().ShowCreator();
     }
     public void FinalizeWorldGeneration(Title playerTitle)
     {

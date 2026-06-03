@@ -56,6 +56,8 @@ public class TurnManager : MonoBehaviour
             Debug.Log($"UI opened with {ui.playerCharacter.pendingInteractions.Count} interactions.");
         }
 
+        PlayerManager.Instance.UpdateCharacterParameters();
+
         Debug.Log("--- Turn Complete ---");
     }
 

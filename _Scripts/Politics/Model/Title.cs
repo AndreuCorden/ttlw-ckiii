@@ -23,13 +23,13 @@ public class Title : MonoBehaviour
 
     public void CalculateTreasury()
     {
-        float treasury = seatOfPower.GetGoldPerTurn();
+        float treasury = 0;
         foreach(Territory territory in directDomain)
         {
             treasury += territory.GetGoldPerTurn();
         }
         foreach (var vassal in vassals) treasury += vassal.CalculateTaxForLiege();
-        holder.treasury = treasury;
+        holder.treasury += treasury;
     }
 
     public float CalculateTaxForLiege()
