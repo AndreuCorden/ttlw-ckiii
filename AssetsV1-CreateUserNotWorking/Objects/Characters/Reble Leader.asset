@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 484d57dc0429fe44386a67826f5f9a10, type: 3}
+  m_Name: Reble Leader
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterData
+  characterName: Varius
+  portrait: {fileID: 0}
+  prowess: 0
+  loyalty: 0
+  respect: 50
+  dread: 0
+  isAlliedWithPlayer: 0
+  opinionOfPlayer: 0
+  traits:
+  - {fileID: 11400000, guid: 45a3a971e7cd11f4f840256394827cd8, type: 2}
+  - {fileID: 11400000, guid: 0bed8e89e6306a64ea883990691d5777, type: 2}
+  religion: {fileID: 0}
+  philosophy: {fileID: 0}
+  factionColor: {r: 0.7484276, g: 0.14356618, b: 0.14356618, a: 1}
+  army:
+  - unitType: {fileID: 11400000, guid: 4d71ca16443741b49a35dbcfee5c21a2, type: 2}
+    currentSoldierCount: 50
+    maxSoldierCount: 50
